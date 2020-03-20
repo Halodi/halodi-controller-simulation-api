@@ -107,7 +107,7 @@ namespace ihmc_ros_control
          */
         void addUpdatable(NativeUpdateableInterface* updatable);
     private:
-        Launcher* launcher;
+        JavaVM* launcher;
         jobject controllerObject;
         JavaMethod* updateMethod;
 

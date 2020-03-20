@@ -1,14 +1,15 @@
-#include "launcher.h"
+﻿#include "javavirtualmachine.h"
 #include <iostream>
 #include <sstream>
 #include <cstring>
 #include <algorithm>
+#include <vector>
 
 #include <unistd.h>
 #include <linux/limits.h>
 #include <dirent.h>
 
-void Launcher::displayJNIError(std::string prefix, int error)
+void JavaVirtualMachine::displayJNIError(std::string prefix, int error)
 {
     switch(error)
     {
@@ -22,7 +23,7 @@ void Launcher::displayJNIError(std::string prefix, int error)
     }
 }
 
-JNIEnv* Launcher::getEnv()
+JNIEnv* JavaVirtualMachine::getEnv()
 {
     JNIEnv* ret;
 
@@ -41,7 +42,7 @@ JNIEnv* Launcher::getEnv()
     return ret;
 }
 
-void Launcher::attachCurrentThread()
+void JavaVirtualMachine::attachCurrentThread()
 {
     if(!jvm)
     {
@@ -53,7 +54,7 @@ void Launcher::attachCurrentThread()
     jvm->AttachCurrentThread((void**)&tmp, 0);
 }
 
-void Launcher::detachCurrentThread()
+void JavaVirtualMachine::detachCurrentThread()
 {
     if(!jvm)
     {
@@ -64,57 +65,8 @@ void Launcher::detachCurrentThread()
     jvm->DetachCurrentThread();
 }
 
-bool Launcher::callBooleanMethod(JavaMethod *method, jobject obj, ...)
-{
-    JNIEnv* env = getEnv();
-    if(!env) return false;
 
-    bool returnValue = false;
-    if(env->IsInstanceOf(obj, method->clazz))
-    {
-        va_list arglist;
-        va_start(arglist, obj);
-        returnValue = env->CallBooleanMethodV(obj, method->methodID, arglist);
-        va_end(arglist);
-    }
-    else
-    {
-        std::cerr << __PRETTY_FUNCTION__ << ": Unexpected object type" << std::endl;
-    }
-
-    return returnValue;
-}
-
-void Launcher::call(JavaMethod *method, jobject obj, ...)
-{
-    JNIEnv* env = getEnv();
-    if(!env) return;
-
-    if(env->IsInstanceOf(obj, method->clazz))
-    {
-        va_list arglist;
-        va_start(arglist, obj);
-        env->CallVoidMethodV(obj, method->methodID, arglist);
-        va_end(arglist);
-    }
-    else
-    {
-        std::cerr << __PRETTY_FUNCTION__ << ": Unexpected object type" << std::endl;
-    }
-}
-
-void Launcher::call(StaticJavaMethod *method, ...)
-{
-    JNIEnv* env = getEnv();
-    if(!env) return;
-
-    va_list arglist;
-    va_start(arglist, method);
-    env->CallStaticVoidMethodV(method->clazz, method->methodID, arglist);
-    va_end(arglist);
-}
-
-Launcher::Launcher(std::string vmOptions)
+JavaVirtualMachine::JavaVirtualMachine(std::string workingDirectory, std::string vmOptions)
 {
     vmArguments.version = JNI_VERSION_1_6;
 
@@ -139,10 +91,8 @@ Launcher::Launcher(std::string vmOptions)
     vmArguments.nOptions = (jint) options.size();
     vmArguments.options = javaOptions;
     vmArguments.ignoreUnrecognized = JNI_TRUE;
-}
 
-bool Launcher::startVM(std::string workingDirectory)
-{
+
 
 
     DIR* currentDirectory = opendir(".");
@@ -152,7 +102,8 @@ bool Launcher::startVM(std::string workingDirectory)
         {
             std::cerr << "Cannot change directory to " << workingDirectory << std::endl;
             closedir(currentDirectory);
-            return false;
+            jvm = nullptr;
+            return;
         }
 
     }
@@ -173,18 +124,13 @@ bool Launcher::startVM(std::string workingDirectory)
         }
     }
     closedir(currentDirectory);
-    if(res == JNI_OK)
-    {
-        return true;
-    }
-    else
+    if(res != JNI_OK)
     {
         jvm = nullptr;
-        return false;
     }
 }
 
-jclass Launcher::getClass(std::string className)
+jclass JavaVirtualMachine::getClass(std::string className)
 {
     JNIEnv* env = getEnv();
     if(!env) return nullptr;
@@ -201,36 +147,13 @@ jclass Launcher::getClass(std::string className)
     return cls;
 }
 
-jobject Launcher::createObject(JavaMethod *constructor, ...)
+std::shared_ptr<JavaVirtualMachine> JavaVirtualMachine::startVM(std::string workingDirectory, std::string vmArguments)
 {
-    JNIEnv* env = getEnv();
-    if(!env) return nullptr;
-
-
-    va_list arglist;
-    va_start(arglist, constructor);
-    jobject newObject = env->NewObjectV(constructor->clazz, constructor->methodID, arglist);
-    va_end(arglist);
-    if(newObject)
-    {
-        return env->NewGlobalRef(newObject);
-    }
-    else
-    {
-        return nullptr;
-    }
-
+    return std::shared_ptr<JavaVirtualMachine>(new JavaVirtualMachine(workingDirectory, vmArguments));
 }
 
-void Launcher::release(jobject object)
-{
-    JNIEnv* env = getEnv();
-    if(!env) return;
 
-    env->DeleteGlobalRef(object);
-}
-
-StaticJavaMethod* Launcher::getStaticJavaMethod(std::string className, std::string methodName, std::string signature)
+std::shared_ptr<StaticJavaMethod> JavaVirtualMachine::getStaticJavaMethod(std::string className, std::string methodName, std::string signature)
 {
 
     JNIEnv* env = getEnv();
@@ -247,26 +170,13 @@ StaticJavaMethod* Launcher::getStaticJavaMethod(std::string className, std::stri
         return nullptr;
     }
 
-    StaticJavaMethod* method = new StaticJavaMethod();
-    method->clazz = (jclass) env->NewGlobalRef(cls);
-    method->methodID = mid;
+    std::shared_ptr<StaticJavaMethod> method = std::make_shared<StaticJavaMethod>(shared_from_this(), (jclass) env->NewGlobalRef(cls), mid);
 
     return method;
 }
 
-void Launcher::release(StaticJavaMethod *method)
-{
-    release(method->clazz);
-    delete method;
-}
 
-void Launcher::release(JavaMethod *method)
-{
-    release(method->clazz);
-    delete method;
-}
-
-JavaMethod* Launcher::getJavaMethod(std::string className, std::string methodName, std::string signature)
+std::shared_ptr<JavaMethod> JavaVirtualMachine::getJavaMethod(std::string className, std::string methodName, std::string signature)
 {
 
     JNIEnv* env = getEnv();
@@ -283,14 +193,14 @@ JavaMethod* Launcher::getJavaMethod(std::string className, std::string methodNam
         return nullptr;
     }
 
-    JavaMethod* method = new JavaMethod();
-    method->clazz = (jclass) env->NewGlobalRef(cls);
-    method->methodID = mid;
+
+    std::shared_ptr<JavaMethod> method = std::make_shared<JavaMethod>(shared_from_this(), (jclass) env->NewGlobalRef(cls), mid);
+
 
     return method;
 }
 
-bool Launcher::registerNativeMethod(std::string className, std::string methodName, std::string signature, void *functionPointer)
+bool JavaVirtualMachine::registerNativeMethod(std::string className, std::string methodName, std::string signature, void *functionPointer)
 {
     JNIEnv* env = getEnv();
     if(!env) return false;
@@ -319,29 +229,7 @@ bool Launcher::registerNativeMethod(std::string className, std::string methodNam
     }
 }
 
-bool Launcher::stopVM()
-{
-    if(!jvm)
-    {
-        std::cerr << "Cannot stop JVM, JVM is not started yet" << std::endl;
-        return false;
-    }
-    jint res = jvm->DestroyJavaVM();
-    displayJNIError("Stopping Java VM", res);
-
-    if(res == JNI_OK)
-    {
-        jvm = nullptr;
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-
-}
-
-bool Launcher::isAssignableFrom(std::string subclass, std::string superclass)
+bool JavaVirtualMachine::isAssignableFrom(std::string subclass, std::string superclass)
 {
     JNIEnv* env = getEnv();
     if(!env) return false;
@@ -359,12 +247,155 @@ bool Launcher::isAssignableFrom(std::string subclass, std::string superclass)
     }
 }
 
-Launcher::~Launcher()
+JavaVirtualMachine::~JavaVirtualMachine()
 {
 //    if(jvm)
 //        stopVM();
+
+    std::cout << "DTOR Launcher" << std::endl;
+
+
+    if(!jvm)
+    {
+        return;
+    }
+    jint res = jvm->DestroyJavaVM();
+    displayJNIError("Stopping Java VM", res);
+
+    if(res == JNI_OK)
+    {
+        jvm = nullptr;
+    }
+
 
     delete vmArguments.options;
 }
 
 
+JavaMethod::JavaMethod(std::shared_ptr<JavaVirtualMachine> launcher_, jclass clazz_, jmethodID methodID_) :
+    launcher(launcher_),
+    clazz(clazz_),
+    methodID(methodID_)
+{
+    std::cout << "CTOR JavaMethod" << std::endl;
+}
+
+JavaMethod::~JavaMethod()
+{
+    std::cout << "DTOR JavaMethod" << std::endl;
+
+    JNIEnv* env = launcher->getEnv();
+    if(!env) return;
+
+    env->DeleteGlobalRef(clazz);
+}
+
+void JavaMethod::callVoidMethod(std::shared_ptr<JavaObject> obj, ...)
+{
+    JNIEnv* env = launcher->getEnv();
+    if(!env) return;
+
+    if(env->IsInstanceOf(obj->native(), clazz))
+    {
+        va_list arglist;
+        va_start(arglist, obj);
+        env->CallVoidMethodV(obj->native(), methodID, arglist);
+        va_end(arglist);
+    }
+    else
+    {
+        std::cerr << __PRETTY_FUNCTION__ << ": Unexpected object type" << std::endl;
+    }
+}
+
+jboolean JavaMethod::callBooleanMethod(std::shared_ptr<JavaObject> obj, ...)
+{
+    JNIEnv* env = launcher->getEnv();
+    if(!env) return false;
+
+    bool returnValue = false;
+    if(env->IsInstanceOf(obj->native(), clazz))
+    {
+        va_list arglist;
+        va_start(arglist, obj);
+        returnValue = env->CallBooleanMethodV(obj->native(), methodID, arglist);
+        va_end(arglist);
+    }
+    else
+    {
+        std::cerr << __PRETTY_FUNCTION__ << ": Unexpected object type" << std::endl;
+    }
+
+    return returnValue;
+}
+
+std::shared_ptr<JavaObject> JavaMethod::createObject(jargument_t arg, ...)
+{
+    JNIEnv* env = launcher->getEnv();
+    if(!env) return nullptr;
+
+
+    va_list arglist;
+    va_start(arglist, arg);
+    jobject newObject = env->NewObjectV(clazz, methodID, arglist);
+    va_end(arglist);
+    if(newObject)
+    {
+        return std::make_shared<JavaObject>(launcher, env->NewGlobalRef(newObject));
+    }
+    else
+    {
+        return nullptr;
+    }
+}
+
+
+
+StaticJavaMethod::StaticJavaMethod(std::shared_ptr<JavaVirtualMachine> launcher_, jclass clazz_, jmethodID methodID_) :
+    launcher(launcher_),
+    clazz(clazz_),
+    methodID(methodID_)
+{
+    std::cout << "CTOR StaticJavaMethod " << std::endl;
+}
+
+StaticJavaMethod::~StaticJavaMethod()
+{
+    std::cout << "DTOR StaticJavaMethod" << std::endl;
+
+
+    JNIEnv* env = launcher->getEnv();
+    if(!env) return;
+
+    env->DeleteGlobalRef(clazz);
+}
+
+void StaticJavaMethod::callVoidMethod(jargument_t arg, ...)
+{
+    JNIEnv* env = launcher->getEnv();
+    if(!env) return;
+
+    va_list arglist;
+    va_start(arglist, arg);
+    env->CallStaticVoidMethodV(clazz, methodID, arglist);
+    va_end(arglist);
+}
+
+
+
+JavaObject::JavaObject(std::shared_ptr<JavaVirtualMachine> launcher_, jobject object_) :
+    launcher(launcher_),
+    object(object_)
+{
+
+}
+
+JavaObject::~JavaObject()
+{
+    std::cout << "DTOR JavaObject" << std::endl;
+
+    JNIEnv* env = launcher->getEnv();
+    if(!env) return;
+
+    env->DeleteGlobalRef(object);
+}

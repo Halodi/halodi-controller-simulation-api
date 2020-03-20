@@ -116,7 +116,7 @@ namespace ihmc_ros_control
     bool IHMCRosControlJavaBridge::startJVM(hardware_interface::EffortJointInterface *hw, std::string jvmArguments, std::string workingDirectory)
     {
         ROS_INFO_STREAM("Starting JVM with arguments: " << jvmArguments);
-        launcher = new Launcher(jvmArguments);
+        launcher = new JavaVM(jvmArguments);
         if(!launcher->startVM(workingDirectory))
         {
             ROS_ERROR("Cannot start Java VM. If you previously ran a Java controller, limitations in the Java JNI Invocation API prohibit restarting the JVM within a single process. ");

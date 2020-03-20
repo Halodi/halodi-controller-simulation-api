@@ -1,5 +1,5 @@
 
-#include "jvmLauncher/launcher.h"
+#include "jvmLauncher/javavirtualmachine.h"
 #include <iostream>
 
 JNIEXPORT void JNICALL callVoidFunctionWithString
@@ -32,23 +32,21 @@ timespec diff(timespec start, timespec end)
 
 int main(int argc, char *argv[])
 {
-    Launcher launcher("-Djava.class.path=src/ihmcroscontrol/bin");
+    std::shared_ptr<JavaVirtualMachine> launcher = JavaVirtualMachine::startVM(".", "-Djava.class.path=/home/jesper/git/halodi/halodi-controller-simulation-api/bin/main");
 
 
-    launcher.startVM();
-
-    launcher.registerNativeMethod("us.ihmc.rosControl.launcher.TestJVMLaunchCallback", "callVoidFunctionWithString", "(Ljava/lang/String;)V", (void *)&callVoidFunctionWithString);
-    launcher.registerNativeMethod("us.ihmc.rosControl.launcher.TestJVMLaunchCallback", "callIntFunctionWithBoolean", "(ZZ)I", (void *)&callIntFunctionWithBoolean);
+    launcher->registerNativeMethod("us.ihmc.rosControl.launcher.TestJVMLaunchCallback", "callVoidFunctionWithString", "(Ljava/lang/String;)V", (void *)&callVoidFunctionWithString);
+    launcher->registerNativeMethod("us.ihmc.rosControl.launcher.TestJVMLaunchCallback", "callIntFunctionWithBoolean", "(ZZ)I", (void *)&callIntFunctionWithBoolean);
 
 
-    JavaMethod* ctor = launcher.getJavaMethod("us.ihmc.rosControl.launcher.TestJVMLaunchCallback", "<init>", "(I)V");
-    JavaMethod* method = launcher.getJavaMethod("us.ihmc.rosControl.launcher.TestJVMLaunchCallback", "execute", "(I)V");
+    std::shared_ptr<JavaMethod> ctor = launcher->getJavaMethod("us.ihmc.rosControl.launcher.TestJVMLaunchCallback", "<init>", "(I)V");
+    std::shared_ptr<JavaMethod> method = launcher->getJavaMethod("us.ihmc.rosControl.launcher.TestJVMLaunchCallback", "execute", "(I)V");
 
-    JavaMethod* add = launcher.getJavaMethod("us.ihmc.rosControl.launcher.TestJVMLaunchCallback", "add", "()V");
+    std::shared_ptr<JavaMethod> add = launcher->getJavaMethod("us.ihmc.rosControl.launcher.TestJVMLaunchCallback", "add", "()V");
 
     if(ctor && method && add)
     {
-        jobject obj = launcher.createObject(ctor, 42);
+        std::shared_ptr<JavaObject> obj = ctor->createObject(jargument, 42);
 
 
         timespec start;
@@ -58,7 +56,7 @@ int main(int argc, char *argv[])
             clock_gettime(CLOCK_MONOTONIC, &start);
             for(int i = 0; i < 100000; i++)
             {
-                launcher.call(add, obj);
+                add->callVoidMethod(obj);
             }
             clock_gettime(CLOCK_MONOTONIC, &end);
 
@@ -70,13 +68,7 @@ int main(int argc, char *argv[])
 
 
 
-        launcher.call(method, obj, 124);
+        method->callVoidMethod(obj, 124);
 
     }
-
-
-
-
-    launcher.stopVM();
-
 }
