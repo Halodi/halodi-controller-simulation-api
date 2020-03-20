@@ -149,7 +149,18 @@ jclass JavaVirtualMachine::getClass(std::string className)
 
 std::shared_ptr<JavaVirtualMachine> JavaVirtualMachine::startVM(std::string workingDirectory, std::string vmArguments)
 {
-    return std::shared_ptr<JavaVirtualMachine>(new JavaVirtualMachine(workingDirectory, vmArguments));
+    JavaVirtualMachine* vm = new JavaVirtualMachine(workingDirectory, vmArguments);
+    if(vm->jvm)
+    {
+        return std::shared_ptr<JavaVirtualMachine>(vm);
+    }
+    else
+    {
+        std::cerr << "CANNOT START JVM" << std::endl;
+        return nullptr;
+    }
+
+
 }
 
 
@@ -252,8 +263,6 @@ JavaVirtualMachine::~JavaVirtualMachine()
 //    if(jvm)
 //        stopVM();
 
-    std::cout << "DTOR Launcher" << std::endl;
-
 
     if(!jvm)
     {
@@ -277,12 +286,10 @@ JavaMethod::JavaMethod(std::shared_ptr<JavaVirtualMachine> launcher_, jclass cla
     clazz(clazz_),
     methodID(methodID_)
 {
-    std::cout << "CTOR JavaMethod" << std::endl;
 }
 
 JavaMethod::~JavaMethod()
 {
-    std::cout << "DTOR JavaMethod" << std::endl;
 
     JNIEnv* env = launcher->getEnv();
     if(!env) return;
@@ -356,14 +363,10 @@ StaticJavaMethod::StaticJavaMethod(std::shared_ptr<JavaVirtualMachine> launcher_
     clazz(clazz_),
     methodID(methodID_)
 {
-    std::cout << "CTOR StaticJavaMethod " << std::endl;
 }
 
 StaticJavaMethod::~StaticJavaMethod()
 {
-    std::cout << "DTOR StaticJavaMethod" << std::endl;
-
-
     JNIEnv* env = launcher->getEnv();
     if(!env) return;
 
@@ -392,8 +395,6 @@ JavaObject::JavaObject(std::shared_ptr<JavaVirtualMachine> launcher_, jobject ob
 
 JavaObject::~JavaObject()
 {
-    std::cout << "DTOR JavaObject" << std::endl;
-
     JNIEnv* env = launcher->getEnv();
     if(!env) return;
 
