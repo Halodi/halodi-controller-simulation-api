@@ -1,7 +1,7 @@
 package us.ihmc.rosControl.demo;
 
 import us.ihmc.rosControl.IHMCRosControlJavaBridge;
-import us.ihmc.rosControl.EffortJointHandle;
+import us.ihmc.rosControl.wholeRobot.EffortJointHandle;
 
 public class RRBotJavaDemo extends IHMCRosControlJavaBridge
 {

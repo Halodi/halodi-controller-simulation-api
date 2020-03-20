@@ -5,6 +5,12 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 
 import us.ihmc.rosControl.util.CallbackPrintStream;
+import us.ihmc.rosControl.wholeRobot.EffortJointHandle;
+import us.ihmc.rosControl.wholeRobot.EffortJointHandleImpl;
+import us.ihmc.rosControl.wholeRobot.ForceTorqueSensorHandle;
+import us.ihmc.rosControl.wholeRobot.ForceTorqueSensorHandleImpl;
+import us.ihmc.rosControl.wholeRobot.IMUHandle;
+import us.ihmc.rosControl.wholeRobot.IMUHandleImpl;
 
 public abstract class IHMCRosControlJavaBridge
 {
@@ -13,7 +19,7 @@ public abstract class IHMCRosControlJavaBridge
    private ByteBuffer readBuffer;
    private ByteBuffer writeBuffer;
    
-   private final native boolean addJointToBufferN(long thisPtr, String jointName);
+   public final native boolean addJointToBufferN(long thisPtr, String jointName);
    
    private final native static void rosError(String error);
    private final native static void rosInfo(String msg);
@@ -52,17 +58,87 @@ public abstract class IHMCRosControlJavaBridge
       });
    }
    
-   protected boolean inInit()
+   private final native boolean addIMUToBufferN(long thisPtr, String imuName);
+   private final native boolean addForceTorqueSensorToBufferN(long thisPtr, String forceTorqueSensorName);
+
+
+   /**
+    * Return a new JointStateHandle. Call from init()
+    *
+    * @param jointName
+    * @return
+    */
+   protected final EffortJointHandle createEffortJointHandle(String jointName)
+   {
+      if(!inInit())
+      {
+         throw new RuntimeException("createEffortJointHandle should only be called from init()");
+      }
+      if(!addJointToBufferN(getDelegatePtr(), jointName))
+      {
+         throw new IllegalArgumentException("Cannot find joint with name " + jointName);
+      }
+      EffortJointHandleImpl jointHandle = new EffortJointHandleImpl(jointName);
+      addUpdatable(jointHandle);
+      return jointHandle;
+   }
+
+
+   
+   /**
+    * Return a new IMUHandle. Call from init()
+    * 
+    * @param imuName
+    * @return
+    */
+   protected final IMUHandle createIMUHandle(String imuName)
+   {
+      if(!inInit())
+      {
+         throw new RuntimeException("createIMUHandle should only be called from init()");
+      }
+      if(!addIMUToBufferN(getDelegatePtr(), imuName))
+      {
+         throw new IllegalArgumentException("Cannot find IMU with name " + imuName);
+      }
+      IMUHandleImpl imuHandle = new IMUHandleImpl(imuName);
+      addUpdatable(imuHandle);
+      return imuHandle;
+   }
+
+   /**
+    * Return a new force torque sensor handle. Call from init()
+    * 
+    * @param forceTorqueSensorName
+    * @return
+    */
+   protected final ForceTorqueSensorHandle createForceTorqueSensorHandle(String forceTorqueSensorName)
+   {
+      if(!inInit())
+      {
+         throw new RuntimeException("createForceTorqueSensorHandle should only be called from init()");
+      }
+      if(!addForceTorqueSensorToBufferN(getDelegatePtr(), forceTorqueSensorName))
+      {
+         throw new IllegalArgumentException("Cannot find force torque sensor with name " + forceTorqueSensorName);
+      }
+      ForceTorqueSensorHandleImpl imuHandle = new ForceTorqueSensorHandleImpl(forceTorqueSensorName);
+      addUpdatable(imuHandle);
+      return imuHandle;
+   }
+   
+   
+   public boolean inInit()
    {
       return inInit;
    }
    
-   protected long getDelegatePtr()
+   public long getDelegatePtr()
    {
       return delegatePtr;
    }
    
-   protected void addUpdatable(NativeUpdateableInterface updatable)
+   public void addUpdatable(NativeUpdateableInterface updatable)
    {
       if(!inInit)
       {
@@ -72,26 +148,6 @@ public abstract class IHMCRosControlJavaBridge
       updatables.add(updatable);
    }
    
-   /**
-    * Return a new EffortJointHandle. Call from init()
-    * 
-    * @param jointName
-    * @return
-    */
-   protected final EffortJointHandle createEffortJointHandle(String jointName)
-   {
-      if(!inInit)
-      {
-         throw new RuntimeException("createEffortJointHandle should only be called from init()");
-      }
-      if(!addJointToBufferN(thisPtr, jointName))
-      {
-         throw new IllegalArgumentException("Cannot find joint with name " + jointName);
-      }
-      EffortJointHandleImpl jointHandle = new EffortJointHandleImpl(jointName);
-      updatables.add(jointHandle);
-      return jointHandle;
-   }
 
    boolean initFromNative(long thisPtr, long delegatePtr)
    {

@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 import us.ihmc.rosControl.NativeUpdateableInterface;
 
-class ForceTorqueSensorHandleImpl implements ForceTorqueSensorHandle, NativeUpdateableInterface
+public class ForceTorqueSensorHandleImpl implements ForceTorqueSensorHandle, NativeUpdateableInterface
 {
    private final String name;
    private double fx, fy, fz;

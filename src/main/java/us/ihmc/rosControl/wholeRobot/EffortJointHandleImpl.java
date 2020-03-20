@@ -1,21 +1,22 @@
 package us.ihmc.rosControl.wholeRobot;
 
-import us.ihmc.rosControl.NativeUpdateableInterface;
-
 import java.nio.ByteBuffer;
 
-class PositionJointHandleImpl implements PositionJointHandle, NativeUpdateableInterface
+import us.ihmc.rosControl.NativeUpdateableInterface;
+
+public class EffortJointHandleImpl implements EffortJointHandle, NativeUpdateableInterface
 {
    private final String jointName;
-
+   
    private double effort;
    private double position;
    private double velocity;
-
-   private double desiredPosition;
-
-
-   PositionJointHandleImpl(String jointName)
+   
+   private double desiredEffort;
+   private double dampingScale;
+   
+   
+   public EffortJointHandleImpl(String jointName)
    {
       this.jointName = jointName;
    }
@@ -29,7 +30,8 @@ class PositionJointHandleImpl implements PositionJointHandle, NativeUpdateableIn
    
    public void writeToBuffer(ByteBuffer buffer)
    {
-      buffer.putDouble(desiredPosition);
+      buffer.putDouble(desiredEffort);
+      buffer.putDouble(dampingScale);
    }
    
    
@@ -52,15 +54,21 @@ class PositionJointHandleImpl implements PositionJointHandle, NativeUpdateableIn
    }
 
    @Override
-   public void setDesiredPosition(double desiredPosition)
+   public void setDesiredEffort(double desiredEffort)
    {
-      this.desiredPosition = desiredPosition;
+      this.desiredEffort = desiredEffort;
    }
 
    @Override
    public String getName()
    {
       return jointName;
+   }
+
+   @Override
+   public void setDampingScale(double dampingScale)
+   {
+      this.dampingScale = dampingScale;
    }
    
 }

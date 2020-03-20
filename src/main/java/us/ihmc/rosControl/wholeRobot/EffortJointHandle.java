@@ -1,15 +1,13 @@
 package us.ihmc.rosControl.wholeRobot;
 
-/**
- * Created by dstephen on 3/21/16.
- */
-public interface PositionJointHandle
+public interface EffortJointHandle
 {
    public String getName();
-
+   
    public double getEffort();
    public double getPosition();
    public double getVelocity();
-
-   public void setDesiredPosition(double desiredEffort);
+   
+   public void setDesiredEffort(double desiredEffort);
+   public void setDampingScale(double dampingScale);
 }
