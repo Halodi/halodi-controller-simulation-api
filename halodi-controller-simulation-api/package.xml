@@ -1,30 +1,19 @@
 <?xml version="1.0"?>
-<package>
-  <name>ihmc_ros_control</name>
-  <version>0.6.0</version>
-  <description>This package provides facilities for using IHMC Java software as
-    a ros_control compatible controller through native libraries</description>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>halodi-controller-simulation-api</name>
+  <version>0.1.0</version>
+  <description>This package provides support for using the Halodi controller as a C++ plugin for your own simulation package</description>
 
-  <author email="jsmith@ihmc.us">Jesper Smith</author>
-  <author email="dstephen@ihmc.us">Doug Stephen</author>
-  <maintainer email="jsmith@ihmc.us">Jesper Smith</maintainer>
-  <maintainer email="dstephen@ihmc.us">Doug Stephen</maintainer>
+  <author email="jesper@halodi.com">Jesper Smith</author>
+  <maintainer email="jesper@halodi.com">Jesper Smith</maintainer>
 
-  <url type="website">https://github.org/ihmcrobotics/ihmc_ros_control</url>
+  <url type="website">https://github.com/Halodi/halodi-controller-simulation-api</url>
 
   <license>Apache 2.0</license>
 
-  <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>controller_interface</build_depend>
-  <build_depend>effort_controllers</build_depend>
-  <build_depend>hardware_interface</build_depend>
-  <build_depend>java</build_depend>
-  <run_depend>controller_interface</run_depend>
-  <run_depend>effort_controllers</run_depend>
-  <run_depend>hardware_interface</run_depend>
-  <run_depend>java</run_depend>
-
   <export>
-    <controller_interface plugin ="${prefix}/whole_robot_controller_plugin.xml"/>
+    <build_type>ament_cmake</build_type>
   </export>
+
 </package>

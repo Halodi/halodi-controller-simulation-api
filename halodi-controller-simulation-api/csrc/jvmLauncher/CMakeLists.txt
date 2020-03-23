@@ -1,14 +1,12 @@
-add_library(jvmLauncher javavirtualmachine.cpp)
+add_library(jvmLauncher STATIC javavirtualmachine.cpp)
 target_link_libraries(jvmLauncher ${JNI_LIBRARIES})
 
 set_property(TARGET jvmLauncher PROPERTY INSTALL_RPATH_USE_LINK_PATH TRUE)
+set_property(TARGET jvmLauncher PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 
-add_executable(jvm-launcher-demo demo.cpp)
-target_link_libraries(jvm-launcher-demo jvmLauncher)
-
-
-install(TARGETS jvmLauncher
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  )
+if(NOT ament_cmake_FOUND)
+    add_executable(jvm-launcher-demo demo.cpp)
+    target_link_libraries(jvm-launcher-demo jvmLauncher)
+endif()
 
