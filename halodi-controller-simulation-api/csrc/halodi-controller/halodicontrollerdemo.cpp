@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
     ControllerConfiguration config;
 
     config.mainClass = "com.halodi.controllerAPI.HalodiControllerJavaBridge";
-    config.classPath = "/home/jesper/git/halodi/halodi-controller-simulation-api/bin/main";
+    config.classPath = "/home/jesper/git/halodi/ros2_ws/src/halodi-controller-simulation-api/halodi-controller-simulation-api/bin/main";
 
 
     std::shared_ptr<HalodiController> controller = HalodiController::create(config);
