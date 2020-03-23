@@ -1,4 +1,5 @@
 
+import os 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.actions import IncludeLaunchDescription
@@ -18,15 +19,20 @@ def generate_launch_description():
         
         DeclareLaunchArgument(
             'world',
-            default_value=[package_prefix, '/worlds/eve_flat_ground.world'],
+            default_value=os.path.join(package_prefix, 'worlds' ,'eve_flat_ground.world'),
             description='Set world to laucnh',
+            ),
+        DeclareLaunchArgument(
+            'verbose',
+            default_value='true',
+            description='Enable verbosity',
             ),
         
         IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([gazebo_package_prefix, '/launch/gzserver.launch.py'])
+            PythonLaunchDescriptionSource(os.path.join(gazebo_package_prefix, 'launch', 'gzserver.launch.py'))
         ),
 
         IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([gazebo_package_prefix, '/launch/gzclient.launch.py'])
+            PythonLaunchDescriptionSource(os.path.join(gazebo_package_prefix, 'launch', 'gzclient.launch.py'))
         ),
     ])
