@@ -18,7 +18,7 @@ public:
     std::shared_ptr<ForceTorqueSensorHandle> addForceTorqueSensor(std::string parentLink, std::string name);
 
     bool initialize();
-    void update(long long timeInNanoseconds);
+    void update(long long timeInNanoseconds, long long duration);
     void reset();
 
 

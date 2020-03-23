@@ -238,10 +238,6 @@ bool JavaVirtualMachine::isAssignableFrom(std::string subclass, std::string supe
 
 JavaVirtualMachine::~JavaVirtualMachine()
 {
-//    if(jvm)
-//        stopVM();
-
-
     if(!jvm)
     {
         return;

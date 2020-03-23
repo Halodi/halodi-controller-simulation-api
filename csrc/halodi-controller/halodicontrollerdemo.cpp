@@ -16,5 +16,17 @@ int main(int argc, char *argv[])
 
     controller->initialize();
 
-    std::cout << "DEMO" << std::endl;
+
+    for(unsigned int i = 0; i < 10; ++i)
+    {
+        joint1->setPosition(i);
+        joint2->setPosition(-i);
+
+        controller->update(i * 1000000, 1000000);
+
+        std::cout << "Torques: " << joint1->getDesiredEffort() << " " << joint2->getDesiredEffort() << std::endl;
+    }
+
+    controller->reset();
+
 }

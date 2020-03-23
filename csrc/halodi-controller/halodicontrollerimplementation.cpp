@@ -61,15 +61,14 @@ bool HalodiControllerImplementation::initialize()
     jInitialize->callBooleanMethod(bridge);
 }
 
-void HalodiControllerImplementation::update(long long timeInNanoseconds)
+void HalodiControllerImplementation::update(long long timeInNanoseconds, long long duration)
 {
-    //launcher->call(updateMethod, controllerObject, time.toNSec(), period.toNSec());
-
+    jUpdate->callVoidMethod(bridge, timeInNanoseconds, duration);
 }
 
 void HalodiControllerImplementation::reset()
 {
-
+    jReset->callVoidMethod(bridge);
 }
 
 }

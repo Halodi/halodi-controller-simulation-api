@@ -151,8 +151,10 @@ public:
 
     /**
          * @brief update Run the update loop of the controller. This copies the current states from the joint handles to the controller and sets the desired torque and damping from the controller.
+         * @param timeInNanoseconds Monotonic clock time in nanoseconds
+         * @param duration Duration of last cycle in nanoseconds (expected to be 1ms / 10^6 nanoseconds)
          */
-    virtual void update(long long timeInNanoseconds) = 0;
+    virtual void update(long long timeInNanoseconds, long long duration) = 0;
 
 
     /**
