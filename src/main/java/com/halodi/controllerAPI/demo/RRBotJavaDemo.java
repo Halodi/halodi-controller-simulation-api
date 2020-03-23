@@ -1,9 +1,9 @@
-package us.ihmc.rosControl.demo;
+package com.halodi.controllerAPI.demo;
 
-import us.ihmc.rosControl.IHMCRosControlJavaBridge;
-import us.ihmc.rosControl.wholeRobot.EffortJointHandle;
+import com.halodi.controllerAPI.HalodiControllerJavaBridge;
+import com.halodi.controllerAPI.wholeRobot.EffortJointHandle;
 
-public class RRBotJavaDemo extends IHMCRosControlJavaBridge
+public class RRBotJavaDemo extends HalodiControllerJavaBridge
 {
 
    private EffortJointHandle joint1;

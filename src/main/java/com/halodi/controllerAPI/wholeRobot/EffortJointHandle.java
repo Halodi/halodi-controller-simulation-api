@@ -1,4 +1,4 @@
-package us.ihmc.rosControl.wholeRobot;
+package com.halodi.controllerAPI.wholeRobot;
 
 public interface EffortJointHandle
 {

@@ -18,6 +18,7 @@ public:
     virtual ~JavaMethod();
 
     void callVoidMethod(std::shared_ptr<JavaObject> obj, ...);
+    void* callBytebufferMethod(std::shared_ptr<JavaObject> obj, int minimumCapacity, ...);
     jboolean callBooleanMethod(std::shared_ptr<JavaObject> obj, ...);
 
     std::shared_ptr<JavaObject> createObject(jargument_t arg, ...);
@@ -59,6 +60,23 @@ private:
 
 };
 
+class JavaString
+{
+public:
+    JavaString(std::shared_ptr<JavaVirtualMachine> launcher_, std::string string_);
+    virtual ~JavaString();
+
+    jstring native()
+    {
+        return jdata;
+    }
+
+private:
+    std::shared_ptr<JavaVirtualMachine> launcher;
+    jstring jdata;
+
+};
+
 
 class JavaVirtualMachine : public std::enable_shared_from_this<JavaVirtualMachine>
 {
@@ -80,8 +98,9 @@ public:
     std::shared_ptr<JavaMethod> getJavaMethod(std::string className, std::string method, std::string signature);
     std::shared_ptr<StaticJavaMethod> getStaticJavaMethod(std::string className, std::string methodName, std::string signature);
 
+    std::shared_ptr<JavaString> createJavaString(std::string stdStr);
 
-    bool registerNativeMethod(std::string className, std::string method, std::string signature, void* functionPointer);
+    void registerNativeMethod(std::string className, std::string method, std::string signature, void* functionPointer);
 
     bool isAssignableFrom(std::string subclass, std::string superclass);
 

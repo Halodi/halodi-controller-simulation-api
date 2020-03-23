@@ -1,24 +1,17 @@
 #pragma once
 
 #include "halodi-controller/halodicontroller.h"
-#include "NativeUpdateableInterface.h"
-
 
 namespace halodi_controller
 {
-    class NativeEffortJointHandleHolder : public NativeUpdateableInterface, JointHandle
+    class NativeEffortJointHandleHolder : public JointHandle
     {
     public:
-        NativeEffortJointHandleHolder();
+        static const unsigned int size = 5;
+
+        NativeEffortJointHandleHolder(double* data_);
 
         virtual ~NativeEffortJointHandleHolder();
-
-        void readStateIntoBuffer(int& index, double* buffer);
-        virtual void writeCommandIntoBuffer(int& index, double* buffer);
-
-        int stateSize();
-        virtual int commandSize();
-
 
 
 
@@ -33,7 +26,7 @@ namespace halodi_controller
        double getDampingScale();
 
     private:
-        double position, velocity, measuredEffort;
-        double desiredEffort, dampingScale;
+
+        double* data;
     };
 }

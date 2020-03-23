@@ -1,4 +1,4 @@
-package us.ihmc.rosControl.wholeRobot;
+package com.halodi.controllerAPI.wholeRobot;
 
 public interface ForceTorqueSensorHandle
 {
@@ -16,5 +16,7 @@ public interface ForceTorqueSensorHandle
    double getFx();
 
    String getName();
+
+   String getParentLink();
 
 }

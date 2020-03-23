@@ -1,12 +1,12 @@
-package us.ihmc.rosControl.demo;
+package com.halodi.controllerAPI.demo;
 
-import us.ihmc.rosControl.wholeRobot.EffortJointHandle;
-import us.ihmc.rosControl.wholeRobot.EffortJointHandleImpl;
-import us.ihmc.rosControl.wholeRobot.ForceTorqueSensorHandle;
-import us.ihmc.rosControl.wholeRobot.ForceTorqueSensorHandleImpl;
-import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
-import us.ihmc.rosControl.wholeRobot.IMUHandle;
-import us.ihmc.rosControl.wholeRobot.IMUHandleImpl;
+import com.halodi.controllerAPI.wholeRobot.EffortJointHandle;
+import com.halodi.controllerAPI.wholeRobot.EffortJointHandleImpl;
+import com.halodi.controllerAPI.wholeRobot.ForceTorqueSensorHandle;
+import com.halodi.controllerAPI.wholeRobot.ForceTorqueSensorHandleImpl;
+import com.halodi.controllerAPI.wholeRobot.IHMCWholeRobotControlJavaBridge;
+import com.halodi.controllerAPI.wholeRobot.IMUHandle;
+import com.halodi.controllerAPI.wholeRobot.IMUHandleImpl;
 
 public class WholeRobotJavaDemo extends IHMCWholeRobotControlJavaBridge
 {

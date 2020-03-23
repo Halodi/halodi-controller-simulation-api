@@ -3,7 +3,8 @@
 
 namespace halodi_controller
 {
-    NativeIMUHandleHolder::NativeIMUHandleHolder()
+    NativeIMUHandleHolder::NativeIMUHandleHolder(double *data_) :
+        data(data_)
     {
     }
 
@@ -13,59 +14,25 @@ namespace halodi_controller
 
     }
 
-    void NativeIMUHandleHolder::readStateIntoBuffer(int& index, double* buffer)
-    {
-        for(int i = 0; i < orientationSize; i++)
-        {
-            buffer[index++] = quaternion[i];
-        }
-
-        for(int i = 0; i < angularVelocitySize; i++)
-        {
-            buffer[index++] = angularVelocity[i];
-        }
-
-        for(int i = 0; i < linearAccelerationSize; i++)
-        {
-            buffer[index++] = linearAcceleration[i];
-        }
-
-    }
-
-    void NativeIMUHandleHolder::writeCommandIntoBuffer(int& index, double* buffer)
-    {
-        // Nothing to do here
-    }
-
-    int NativeIMUHandleHolder::stateSize()
-    {
-        return orientationSize + angularVelocitySize + linearAccelerationSize;
-    }
-
-    int NativeIMUHandleHolder::commandSize()
-    {
-        return 0;
-    }
-
     void NativeIMUHandleHolder::setOrientationQuaternion(double wx, double wy, double wz, double ws)
     {
-        quaternion[0] = wx;
-        quaternion[1] = wy;
-        quaternion[2] = wz;
-        quaternion[3] = ws;
+        data[0] = wx;
+        data[1] = wy;
+        data[2] = wz;
+        data[3] = ws;
     }
 
     void NativeIMUHandleHolder::setLinearAcceleration(double xdd, double ydd, double zdd)
     {
-        linearAcceleration[0] = xdd;
-        linearAcceleration[1] = ydd;
-        linearAcceleration[2] = zdd;
+        data[4] = xdd;
+        data[5] = ydd;
+        data[6] = zdd;
     }
 
     void NativeIMUHandleHolder::setAngularVelocity(double wx, double wy, double wz)
     {
-        angularVelocity[0] = wx;
-        angularVelocity[1] = wy;
-        angularVelocity[2] = wz;
+        data[7] = wx;
+        data[8] = wy;
+        data[9] = wz;
     }
 }

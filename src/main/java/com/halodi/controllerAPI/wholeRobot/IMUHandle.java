@@ -1,4 +1,4 @@
-package us.ihmc.rosControl.wholeRobot;
+package com.halodi.controllerAPI.wholeRobot;
 
 public interface IMUHandle
 {
@@ -24,5 +24,7 @@ public interface IMUHandle
    double getQ_x();
 
    String getName();
+   
+   String getParentLink();
    
 }

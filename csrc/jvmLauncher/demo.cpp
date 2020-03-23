@@ -35,14 +35,14 @@ int main(int argc, char *argv[])
     std::shared_ptr<JavaVirtualMachine> launcher = JavaVirtualMachine::startVM(".", "-Djava.class.path=/home/jesper/git/halodi/halodi-controller-simulation-api/bin/main");
 
 
-    launcher->registerNativeMethod("us.ihmc.rosControl.launcher.TestJVMLaunchCallback", "callVoidFunctionWithString", "(Ljava/lang/String;)V", (void *)&callVoidFunctionWithString);
-    launcher->registerNativeMethod("us.ihmc.rosControl.launcher.TestJVMLaunchCallback", "callIntFunctionWithBoolean", "(ZZ)I", (void *)&callIntFunctionWithBoolean);
+    launcher->registerNativeMethod("com.halodi.controllerAPI.launcher.TestJVMLaunchCallback", "callVoidFunctionWithString", "(Ljava/lang/String;)V", (void *)&callVoidFunctionWithString);
+    launcher->registerNativeMethod("com.halodi.controllerAPI.launcher.TestJVMLaunchCallback", "callIntFunctionWithBoolean", "(ZZ)I", (void *)&callIntFunctionWithBoolean);
 
 
-    std::shared_ptr<JavaMethod> ctor = launcher->getJavaMethod("us.ihmc.rosControl.launcher.TestJVMLaunchCallback", "<init>", "(I)V");
-    std::shared_ptr<JavaMethod> method = launcher->getJavaMethod("us.ihmc.rosControl.launcher.TestJVMLaunchCallback", "execute", "(I)V");
+    std::shared_ptr<JavaMethod> ctor = launcher->getJavaMethod("com.halodi.controllerAPI.launcher.TestJVMLaunchCallback", "<init>", "(I)V");
+    std::shared_ptr<JavaMethod> method = launcher->getJavaMethod("com.halodi.controllerAPI.launcher.TestJVMLaunchCallback", "execute", "(I)V");
 
-    std::shared_ptr<JavaMethod> add = launcher->getJavaMethod("us.ihmc.rosControl.launcher.TestJVMLaunchCallback", "add", "()V");
+    std::shared_ptr<JavaMethod> add = launcher->getJavaMethod("com.halodi.controllerAPI.launcher.TestJVMLaunchCallback", "add", "()V");
 
     if(ctor && method && add)
     {

@@ -3,8 +3,11 @@
 
 namespace halodi_controller
 {
-    NativeEffortJointHandleHolder::NativeEffortJointHandleHolder()
+
+    NativeEffortJointHandleHolder::NativeEffortJointHandleHolder(double *data_) :
+        data(data_)
     {
+
     }
 
     NativeEffortJointHandleHolder::~NativeEffortJointHandleHolder()
@@ -12,51 +15,28 @@ namespace halodi_controller
 
     }
 
-    void NativeEffortJointHandleHolder::readStateIntoBuffer(int& index, double* buffer)
-    {
-        buffer[index++] = measuredEffort;
-        buffer[index++] = position;
-        buffer[index++] = velocity;
-    }
-
-    int NativeEffortJointHandleHolder::stateSize()
-    {
-        return 3;
-    }
-
-    int NativeEffortJointHandleHolder::commandSize()
-    {
-        return 1;
-    }
-
     void NativeEffortJointHandleHolder::setPosition(double position)
     {
-        this->position = position;
+        data[0] = position;
     }
 
     void NativeEffortJointHandleHolder::setVelocity(double velocity)
     {
-        this->velocity = velocity;
+        data[1] = velocity;
     }
 
     void NativeEffortJointHandleHolder::setMeasuredEffort(double effort)
     {
-        this->measuredEffort = effort;
+        data[2] = effort;
     }
 
     double NativeEffortJointHandleHolder::getDesiredEffort()
     {
-        return this->desiredEffort;
+        return data[3];
     }
 
     double NativeEffortJointHandleHolder::getDampingScale()
     {
-        return this->dampingScale;
-    }
-
-    void NativeEffortJointHandleHolder::writeCommandIntoBuffer(int &index, double *buffer)
-    {
-        desiredEffort = buffer[index++];
-        dampingScale = buffer[index++];
+        return data[4];
     }
 }

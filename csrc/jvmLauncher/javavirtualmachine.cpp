@@ -1,4 +1,4 @@
-﻿#include "javavirtualmachine.h"
+﻿#include "jvmLauncher/javavirtualmachine.h"
 #include <iostream>
 #include <sstream>
 #include <cstring>
@@ -8,6 +8,8 @@
 #include <unistd.h>
 #include <linux/limits.h>
 #include <dirent.h>
+
+#include <stdexcept>
 
 void JavaVirtualMachine::displayJNIError(std::string prefix, int error)
 {
@@ -29,13 +31,11 @@ JNIEnv* JavaVirtualMachine::getEnv()
 
     if(!jvm)
     {
-        std::cerr << "JVM not started" << std::endl;
         return nullptr;
     }
     jvm->GetEnv((void**) &ret, JNI_VERSION_1_6);
     if(!ret)
     {
-        std::cerr << "Cannot get env" << std::endl;
         return nullptr;
     }
 
@@ -46,8 +46,7 @@ void JavaVirtualMachine::attachCurrentThread()
 {
     if(!jvm)
     {
-        std::cerr << "JVM not started" << std::endl;
-        return;
+        throw std::runtime_error("JVM Not started");
     }
 
     JNIEnv* tmp;
@@ -58,8 +57,7 @@ void JavaVirtualMachine::detachCurrentThread()
 {
     if(!jvm)
     {
-        std::cerr << "JVM not started" << std::endl;
-        return;
+        throw std::runtime_error("JVM Not started");
     }
 
     jvm->DetachCurrentThread();
@@ -100,10 +98,10 @@ JavaVirtualMachine::JavaVirtualMachine(std::string workingDirectory, std::string
     {
         if(chdir(workingDirectory.c_str()) == -1)
         {
-            std::cerr << "Cannot change directory to " << workingDirectory << std::endl;
             closedir(currentDirectory);
             jvm = nullptr;
-            return;
+
+            throw std::runtime_error("Cannot change directory to " + workingDirectory);
         }
 
     }
@@ -127,13 +125,14 @@ JavaVirtualMachine::JavaVirtualMachine(std::string workingDirectory, std::string
     if(res != JNI_OK)
     {
         jvm = nullptr;
+        throw std::runtime_error("JVM failed to start. Error code: " + res);
     }
 }
 
 jclass JavaVirtualMachine::getClass(std::string className)
 {
     JNIEnv* env = getEnv();
-    if(!env) return nullptr;
+    if(!env) throw std::runtime_error("Cannot get env");
 
     std::string classNameCopy(className);
     std::replace (classNameCopy.begin(), classNameCopy.end(), '.', '/');
@@ -141,8 +140,7 @@ jclass JavaVirtualMachine::getClass(std::string className)
     jclass cls = env->FindClass(classNameCopy.c_str());
     if(!cls)
     {
-        std::cerr << "Cannot find class " << classNameCopy << std::endl;
-        return nullptr;
+        throw std::runtime_error("Cannot find class " + classNameCopy);
     }
     return cls;
 }
@@ -150,17 +148,7 @@ jclass JavaVirtualMachine::getClass(std::string className)
 std::shared_ptr<JavaVirtualMachine> JavaVirtualMachine::startVM(std::string workingDirectory, std::string vmArguments)
 {
     JavaVirtualMachine* vm = new JavaVirtualMachine(workingDirectory, vmArguments);
-    if(vm->jvm)
-    {
-        return std::shared_ptr<JavaVirtualMachine>(vm);
-    }
-    else
-    {
-        std::cerr << "CANNOT START JVM" << std::endl;
-        return nullptr;
-    }
-
-
+    return std::shared_ptr<JavaVirtualMachine>(vm);
 }
 
 
@@ -168,22 +156,23 @@ std::shared_ptr<StaticJavaMethod> JavaVirtualMachine::getStaticJavaMethod(std::s
 {
 
     JNIEnv* env = getEnv();
-    if(!env) return nullptr;
+    if(!env) throw std::runtime_error("Cannot get env");
 
     jclass cls = getClass(className);
-    if(!cls) return nullptr;
 
 
     jmethodID mid = env->GetStaticMethodID(cls, methodName.c_str(), signature.c_str());
     if(!mid)
     {
-        std::cerr << "Cannot find method " << methodName << signature << std::endl;
-        return nullptr;
+        throw std::runtime_error("Cannot find method " + methodName + signature);
     }
 
-    std::shared_ptr<StaticJavaMethod> method = std::make_shared<StaticJavaMethod>(shared_from_this(), (jclass) env->NewGlobalRef(cls), mid);
+    return std::make_shared<StaticJavaMethod>(shared_from_this(), (jclass) env->NewGlobalRef(cls), mid);
+}
 
-    return method;
+std::shared_ptr<JavaString> JavaVirtualMachine::createJavaString(std::string stdStr)
+{
+    return std::make_shared<JavaString>(shared_from_this(), stdStr);
 }
 
 
@@ -191,33 +180,27 @@ std::shared_ptr<JavaMethod> JavaVirtualMachine::getJavaMethod(std::string classN
 {
 
     JNIEnv* env = getEnv();
-    if(!env) return nullptr;
+    if(!env) throw std::runtime_error("Cannot get env");
 
     jclass cls = getClass(className);
-    if(!cls) return nullptr;
 
 
     jmethodID mid = env->GetMethodID(cls, methodName.c_str(), signature.c_str());
     if(!mid)
     {
-        std::cerr << "Cannot find method " << methodName << "()" << std::endl;
-        return nullptr;
+        throw std::runtime_error("Cannot find method " + methodName + signature);
     }
 
 
-    std::shared_ptr<JavaMethod> method = std::make_shared<JavaMethod>(shared_from_this(), (jclass) env->NewGlobalRef(cls), mid);
-
-
-    return method;
+    return std::make_shared<JavaMethod>(shared_from_this(), (jclass) env->NewGlobalRef(cls), mid);
 }
 
-bool JavaVirtualMachine::registerNativeMethod(std::string className, std::string methodName, std::string signature, void *functionPointer)
+void JavaVirtualMachine::registerNativeMethod(std::string className, std::string methodName, std::string signature, void *functionPointer)
 {
     JNIEnv* env = getEnv();
-    if(!env) return false;
+    if(!env) throw std::runtime_error("Cannot get env");
 
     jclass cls = getClass(className);
-    if(!cls) return false;
 
     JNINativeMethod *method = new JNINativeMethod[1];
     method[0].name = new char[methodName.length() + 1];
@@ -231,19 +214,14 @@ bool JavaVirtualMachine::registerNativeMethod(std::string className, std::string
     int res = env->RegisterNatives(cls, method, 1);
     if(res != JNI_OK)
     {
-        displayJNIError("Cannot register native method", res);
-        return false;
-    }
-    else
-    {
-        return true;
+        throw std::runtime_error("Cannot register native method");
     }
 }
 
 bool JavaVirtualMachine::isAssignableFrom(std::string subclass, std::string superclass)
 {
     JNIEnv* env = getEnv();
-    if(!env) return false;
+    if(!env) throw std::runtime_error("Cannot get env");
 
     jclass sub = getClass(subclass);
     jclass sup = getClass(superclass);
@@ -292,15 +270,16 @@ JavaMethod::~JavaMethod()
 {
 
     JNIEnv* env = launcher->getEnv();
-    if(!env) return;
-
-    env->DeleteGlobalRef(clazz);
+    if(env)
+    {
+        env->DeleteGlobalRef(clazz);
+    }
 }
 
 void JavaMethod::callVoidMethod(std::shared_ptr<JavaObject> obj, ...)
 {
     JNIEnv* env = launcher->getEnv();
-    if(!env) return;
+    if(!env) throw std::runtime_error("Cannot get env");
 
     if(env->IsInstanceOf(obj->native(), clazz))
     {
@@ -311,14 +290,40 @@ void JavaMethod::callVoidMethod(std::shared_ptr<JavaObject> obj, ...)
     }
     else
     {
-        std::cerr << __PRETTY_FUNCTION__ << ": Unexpected object type" << std::endl;
+        throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": Unexpected object type");
+    }
+}
+
+void* JavaMethod::callBytebufferMethod(std::shared_ptr<JavaObject> obj, int minimumCapacity,...)
+{
+    JNIEnv* env = launcher->getEnv();
+    if(!env) throw std::runtime_error("Cannot get env");
+
+    if(env->IsInstanceOf(obj->native(), clazz))
+    {
+        va_list arglist;
+        va_start(arglist, minimumCapacity);
+        jobject byteBuffer = env->CallObjectMethodV(obj->native(), methodID, arglist);
+        va_end(arglist);
+
+        if(env->GetDirectBufferCapacity(byteBuffer) < minimumCapacity)
+        {
+            throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": Bytebuffer is smaller than minimumCapacity");
+        }
+
+        return env->GetDirectBufferAddress(byteBuffer);
+
+    }
+    else
+    {
+        throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": Unexpected object type");
     }
 }
 
 jboolean JavaMethod::callBooleanMethod(std::shared_ptr<JavaObject> obj, ...)
 {
     JNIEnv* env = launcher->getEnv();
-    if(!env) return false;
+    if(!env) throw std::runtime_error("Cannot get env");
 
     bool returnValue = false;
     if(env->IsInstanceOf(obj->native(), clazz))
@@ -330,7 +335,7 @@ jboolean JavaMethod::callBooleanMethod(std::shared_ptr<JavaObject> obj, ...)
     }
     else
     {
-        std::cerr << __PRETTY_FUNCTION__ << ": Unexpected object type" << std::endl;
+        throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": Unexpected object type");
     }
 
     return returnValue;
@@ -339,7 +344,7 @@ jboolean JavaMethod::callBooleanMethod(std::shared_ptr<JavaObject> obj, ...)
 std::shared_ptr<JavaObject> JavaMethod::createObject(jargument_t arg, ...)
 {
     JNIEnv* env = launcher->getEnv();
-    if(!env) return nullptr;
+    if(!env) throw std::runtime_error("Cannot get env");
 
 
     va_list arglist;
@@ -352,7 +357,7 @@ std::shared_ptr<JavaObject> JavaMethod::createObject(jargument_t arg, ...)
     }
     else
     {
-        return nullptr;
+        throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": Cannot create new object");
     }
 }
 
@@ -376,7 +381,7 @@ StaticJavaMethod::~StaticJavaMethod()
 void StaticJavaMethod::callVoidMethod(jargument_t arg, ...)
 {
     JNIEnv* env = launcher->getEnv();
-    if(!env) return;
+    if(!env) throw std::runtime_error("Cannot get env");
 
     va_list arglist;
     va_start(arglist, arg);
@@ -399,4 +404,28 @@ JavaObject::~JavaObject()
     if(!env) return;
 
     env->DeleteGlobalRef(object);
+}
+
+JavaString::JavaString(std::shared_ptr<JavaVirtualMachine> launcher_, std::string string_) :
+    launcher(launcher_)
+{
+    JNIEnv* env = launcher->getEnv();
+    if(env)
+    {
+        jdata = (jstring)env->NewGlobalRef(env->NewStringUTF(string_.c_str()));
+    }
+    else
+    {
+        throw std::runtime_error("Cannot get env");
+    }
+}
+
+JavaString::~JavaString()
+{
+    JNIEnv* env = launcher->getEnv();
+    if(!env) return;
+
+    if(!jdata) return;
+
+    env->DeleteGlobalRef(jdata);
 }
