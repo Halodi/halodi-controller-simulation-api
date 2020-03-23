@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>halodi-controller-gazebo</name>
+  <version>0.1.0</version>
+  <description>This package provides support for gazebo from the halodi package</description>
+
+  <author email="jesper@halodi.com">Jesper Smith</author>
+  <maintainer email="jesper@halodi.com">Jesper Smith</maintainer>
+
+  <url type="website">https://github.com/Halodi/halodi-controller-simulation-api</url>
+
+  <license>Apache 2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>gazebo</buildtool_depend>
+
+  <depend>halodi-controller-simulation-api</depend>
+  <depend>eve-r3-description</depend>
+  
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+
+</package>

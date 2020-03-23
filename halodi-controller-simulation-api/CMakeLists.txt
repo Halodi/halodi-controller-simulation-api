@@ -19,7 +19,6 @@ install(
 
 
 if(ament_cmake_FOUND)
-message("FOUND AMENT")
     
     ament_export_include_directories(include)
     ament_export_libraries(halodi-controller-api)
