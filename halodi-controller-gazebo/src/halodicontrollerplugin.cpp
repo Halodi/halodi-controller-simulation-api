@@ -60,50 +60,73 @@ public:
         this->model = _model;
 
 
+
         ControllerConfiguration config;
 
         config.mainClass = "com.halodi.controllerAPI.HalodiControllerJavaBridge";
         config.classPath = "/home/jesper/git/halodi/ros2_ws/src/halodi-controller-simulation-api/halodi-controller-simulation-api/bin/main";
 
-
-        controller = HalodiController::create(config);
-
-
-        for(auto &joint : this->model->GetJoints())
+        try
         {
-            if(joint->DOF() == 1)
-            {
 
-                auto controllerJoint = controller->addJoint(joint->GetName());
-                updateables.push_back(std::make_shared<GazeboJointHandle>(controllerJoint, joint));
+            controller = HalodiController::create(config);
+
+
+            for(auto &joint : this->model->GetJoints())
+            {
+                if(joint->DOF() == 1)
+                {
+
+                    auto controllerJoint = controller->addJoint(joint->GetName());
+                    updateables.push_back(std::make_shared<GazeboJointHandle>(controllerJoint, joint));
+                }
+                else
+                {
+                    std::cerr << joint->GetName() << " is not a OneDoFJoint, ignoring.";
+                }
+            }
+
+
+            if(controller->initialize())
+            {
+                this->updateConnection = event::Events::ConnectWorldUpdateBegin(
+                            std::bind(&HalodiControllerPlugin::OnUpdate, this));
             }
             else
             {
-                std::cerr << joint->GetName() << " is not a OneDoFJoint, ignoring.";
+                std::cerr << "Cannot initialize controller. Disabling OnUpdate" << std::endl;
             }
         }
-
-
-
-        this->updateConnection = event::Events::ConnectWorldUpdateBegin(
-                    std::bind(&HalodiControllerPlugin::OnUpdate, this));
+        catch (const std::exception& e)
+        {
+            std::cerr << e.what() << std::endl;
+            std::cerr << "Cannot load controller. Disabling OnUpdate" << std::endl;
+        }
 
     }
 
     void OnUpdate()
     {
-        for(auto updatable : updatables)
+        for(auto updatable : updateables)
         {
             updatable->read();
         }
 
-        controller->update();
+        common::Time time = model->GetWorld()->SimTime();
 
 
-        for(auto updatable : updatables)
+        long long rawTime = ((long long)common::Time::nsInSec) * ((long long)time.sec) + ((long long) time.nsec);
+        long long dt = lastUpdateTime - rawTime;
+
+        controller->update(rawTime, dt);
+
+
+        for(auto updatable : updateables)
         {
             updatable->write();
         }
+
+        lastUpdateTime = rawTime;
     }
 
 
@@ -122,6 +145,9 @@ private:
     event::ConnectionPtr updateConnection;
 
     std::vector<std::shared_ptr<GazeboHandle>> updateables;
+
+
+    long long lastUpdateTime = 0;
 };
 
 GZ_REGISTER_MODEL_PLUGIN(HalodiControllerPlugin)
