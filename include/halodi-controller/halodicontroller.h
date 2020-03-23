@@ -145,8 +145,9 @@ public:
 
     /**
          * @brief initialize Initialize the controller. Call after all handles are added to the controller.
+         * @return false if the controller cannot initialize
          */
-    virtual void initialize() = 0;
+    virtual bool initialize() = 0;
 
     /**
          * @brief update Run the update loop of the controller. This copies the current states from the joint handles to the controller and sets the desired torque and damping from the controller.

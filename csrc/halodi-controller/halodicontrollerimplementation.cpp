@@ -5,6 +5,8 @@
 #include "NativeForceTorqueSensorHandleHolder.h"
 #include "NativeIMUHandleHolder.h"
 
+#include <stdexcept>
+
 namespace  halodi_controller
 {
 
@@ -19,37 +21,11 @@ HalodiControllerImplementation::HalodiControllerImplementation(std::string class
 
 
     jAddJoint = vm->getJavaMethod(mainClass, "createEffortJointHandle", "(Ljava/lang/String;)Ljava/nio/ByteBuffer;");
-    if(jAddJoint == nullptr)
-    {
-        return;
-    }
     jAddIMU = vm->getJavaMethod(mainClass, "createIMUHandle", "(Ljava/lang/String;Ljava/lang/String;)Ljava/nio/ByteBuffer;");
-    if(jAddIMU == nullptr)
-    {
-        return;
-    }
     jAddForceTorqueSensor = vm->getJavaMethod(mainClass, "createForceTorqueSensorHandle", "(Ljava/lang/String;Ljava/lang/String;)Ljava/nio/ByteBuffer;");
-    if(jAddForceTorqueSensor == nullptr)
-    {
-        return;
-    }
-
-    jInitialize = vm->getJavaMethod(mainClass, "initFromNative", "()V");
-    if(jInitialize == nullptr)
-    {
-        std::cerr << "Cannot find initFromNative() in " << mainClass << std::endl;
-    }
-    jUpdate = vm->getJavaMethod(mainClass, "updateFromNative", "(J)V");
-    if(jUpdate == nullptr)
-    {
-        std::cerr << "Cannot find updateFromNative(time) in " << mainClass << std::endl;
-    }
-
+    jInitialize = vm->getJavaMethod(mainClass, "initFromNative", "()Z");
+    jUpdate = vm->getJavaMethod(mainClass, "updateFromNative", "(JJ)V");
     jReset = vm->getJavaMethod(mainClass, "resetFromNative", "()V");
-    if(jReset == nullptr)
-    {
-        std::cerr << "Cannot find resetFromNative() in " << mainClass << std::endl;
-    }
 }
 
 std::shared_ptr<JointHandle> HalodiControllerImplementation::addJoint(std::string name)
@@ -57,11 +33,6 @@ std::shared_ptr<JointHandle> HalodiControllerImplementation::addJoint(std::strin
     std::shared_ptr<JavaString> jName = vm->createJavaString(name);
     double* buffer = (double*) jAddJoint->callBytebufferMethod(bridge, NativeEffortJointHandleHolder::size, jName->native());
 
-    if(!buffer)
-    {
-        std::cerr << "Cannot create joint handle for " << name << std::endl;
-        return nullptr;
-    }
 
     return std::make_shared<NativeEffortJointHandleHolder>(buffer);
 }
@@ -72,11 +43,6 @@ std::shared_ptr<IMUHandle> HalodiControllerImplementation::addIMU(std::string pa
     std::shared_ptr<JavaString> jName = vm->createJavaString(name);
     double* buffer = (double*) jAddIMU->callBytebufferMethod(bridge, NativeIMUHandleHolder::size, jParent->native(), jName->native());
 
-    if(!buffer)
-    {
-        std::cerr << "Cannot create joint handle for " << name << std::endl;
-        return nullptr;
-    }
 
     return std::make_shared<NativeIMUHandleHolder>(buffer);
 }
@@ -87,19 +53,12 @@ std::shared_ptr<ForceTorqueSensorHandle> HalodiControllerImplementation::addForc
     std::shared_ptr<JavaString> jName = vm->createJavaString(name);
     double* buffer = (double*) jAddForceTorqueSensor->callBytebufferMethod(bridge, NativeForceTorqueSensorHandleHolder::size, jParent->native(), jName->native());
 
-    if(!buffer)
-    {
-        std::cerr << "Cannot create joint handle for " << name << std::endl;
-        return nullptr;
-    }
-
     return std::make_shared<NativeForceTorqueSensorHandleHolder>(buffer);
 }
 
-void HalodiControllerImplementation::initialize()
+bool HalodiControllerImplementation::initialize()
 {
-
-
+    jInitialize->callBooleanMethod(bridge);
 }
 
 void HalodiControllerImplementation::update(long long timeInNanoseconds)

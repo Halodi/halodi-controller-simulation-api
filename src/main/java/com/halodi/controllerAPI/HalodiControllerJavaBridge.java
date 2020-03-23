@@ -53,11 +53,11 @@ public class HalodiControllerJavaBridge
     * @param forceTorqueSensorName
     * @return
     */
-   ForceTorqueSensorHandle createForceTorqueSensorHandle(String parentLink, String forceTorqueSensorName)
+   ByteBuffer createForceTorqueSensorHandle(String parentLink, String forceTorqueSensorName)
    {
       ForceTorqueSensorHandleImpl forceTorqueSensorHandle = new ForceTorqueSensorHandleImpl(parentLink, forceTorqueSensorName);
       forceTorqueSensors.put(parentLink + "_" + forceTorqueSensorName, forceTorqueSensorHandle);
-      return forceTorqueSensorHandle;
+      return forceTorqueSensorHandle.getBuffer();
    }
    
    

@@ -306,6 +306,11 @@ void* JavaMethod::callBytebufferMethod(std::shared_ptr<JavaObject> obj, int mini
         jobject byteBuffer = env->CallObjectMethodV(obj->native(), methodID, arglist);
         va_end(arglist);
 
+        if(!byteBuffer)
+        {
+            throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": Bytebuffer is null");
+        }
+
         if(env->GetDirectBufferCapacity(byteBuffer) < minimumCapacity)
         {
             throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": Bytebuffer is smaller than minimumCapacity");

@@ -17,7 +17,7 @@ public:
     std::shared_ptr<IMUHandle> addIMU(std::string parentLink, std::string name);
     std::shared_ptr<ForceTorqueSensorHandle> addForceTorqueSensor(std::string parentLink, std::string name);
 
-    void initialize();
+    bool initialize();
     void update(long long timeInNanoseconds);
     void reset();
 
