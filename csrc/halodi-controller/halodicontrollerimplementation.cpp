@@ -10,16 +10,37 @@
 namespace  halodi_controller
 {
 
-HalodiControllerImplementation::HalodiControllerImplementation(std::string classpath) :
-    vm(JavaVirtualMachine::startVM(".", "-Djava.class.path=" + classpath))
+HalodiControllerImplementation::HalodiControllerImplementation(ControllerConfiguration &configuration)
+
 {
+    if(configuration.mainClass.empty())
+    {
+        throw std::runtime_error("Main class not set.");
+    }
 
-    std::string mainClass = "com.halodi.controllerAPI.HalodiControllerJavaBridge";
+    if(configuration.classPath.empty())
+    {
+        throw std::runtime_error("Classpath not set.");
+    }
 
-    std::shared_ptr<JavaMethod> ctor = vm->getJavaMethod(mainClass, "<init>", "()V");
+    if(configuration.workingDirectory.empty())
+    {
+        throw std::runtime_error("Working directory not set.");
+    }
+
+
+    std::string vmOptions;
+    vmOptions += "-Djava.class.path=" + configuration.classPath;
+    vmOptions += configuration.vmOptions;
+
+    vm = JavaVirtualMachine::startVM(configuration.workingDirectory, vmOptions);
+
+
+    std::shared_ptr<JavaMethod> ctor = vm->getJavaMethod(configuration.mainClass, "<init>", "()V");
     bridge = ctor->createObject(jargument);
 
 
+    std::string mainClass = configuration.mainClass;
     jAddJoint = vm->getJavaMethod(mainClass, "createEffortJointHandle", "(Ljava/lang/String;)Ljava/nio/ByteBuffer;");
     jAddIMU = vm->getJavaMethod(mainClass, "createIMUHandle", "(Ljava/lang/String;Ljava/lang/String;)Ljava/nio/ByteBuffer;");
     jAddForceTorqueSensor = vm->getJavaMethod(mainClass, "createForceTorqueSensorHandle", "(Ljava/lang/String;Ljava/lang/String;)Ljava/nio/ByteBuffer;");
@@ -31,7 +52,7 @@ HalodiControllerImplementation::HalodiControllerImplementation(std::string class
 std::shared_ptr<JointHandle> HalodiControllerImplementation::addJoint(std::string name)
 {
     std::shared_ptr<JavaString> jName = vm->createJavaString(name);
-    double* buffer = (double*) jAddJoint->callBytebufferMethod(bridge, NativeEffortJointHandleHolder::size, jName->native());
+    double* buffer = (double*) jAddJoint->callBytebufferMethod(bridge, NativeEffortJointHandleHolder::size * sizeof(double), jName->native());
 
 
     return std::make_shared<NativeEffortJointHandleHolder>(buffer);
@@ -41,7 +62,7 @@ std::shared_ptr<IMUHandle> HalodiControllerImplementation::addIMU(std::string pa
 {
     std::shared_ptr<JavaString> jParent = vm->createJavaString(parentLink);
     std::shared_ptr<JavaString> jName = vm->createJavaString(name);
-    double* buffer = (double*) jAddIMU->callBytebufferMethod(bridge, NativeIMUHandleHolder::size, jParent->native(), jName->native());
+    double* buffer = (double*) jAddIMU->callBytebufferMethod(bridge, NativeIMUHandleHolder::size * sizeof(double), jParent->native(), jName->native());
 
 
     return std::make_shared<NativeIMUHandleHolder>(buffer);
@@ -51,7 +72,7 @@ std::shared_ptr<ForceTorqueSensorHandle> HalodiControllerImplementation::addForc
 {
     std::shared_ptr<JavaString> jParent = vm->createJavaString(parentLink);
     std::shared_ptr<JavaString> jName = vm->createJavaString(name);
-    double* buffer = (double*) jAddForceTorqueSensor->callBytebufferMethod(bridge, NativeForceTorqueSensorHandleHolder::size, jParent->native(), jName->native());
+    double* buffer = (double*) jAddForceTorqueSensor->callBytebufferMethod(bridge, NativeForceTorqueSensorHandleHolder::size * sizeof(double), jParent->native(), jName->native());
 
     return std::make_shared<NativeForceTorqueSensorHandleHolder>(buffer);
 }

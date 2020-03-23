@@ -75,12 +75,19 @@ public class HalodiControllerJavaBridge
    
    void updateFromNative(long time, long duration)
    {
-      System.out.println(time + " " + duration);
+      System.out.println("Time: " + time + "; dt: " + duration);
+      
+      for(EffortJointHandle joint : joints.values())
+      {
+         System.out.println(joint.getName() + " q: " + joint.getPosition());
+         joint.setDesiredEffort(time);
+      }
+      
    }
    
    void resetFromNative()
    {
-      System.out.println("RESET");
+      System.out.println("Called reset");
    }
    
 //   

@@ -11,7 +11,7 @@ namespace  halodi_controller {
 class HalodiControllerImplementation : public HalodiController
 {
 public:
-    HalodiControllerImplementation(std::string classpath);
+    HalodiControllerImplementation(ControllerConfiguration &configuration);
 
     std::shared_ptr<JointHandle> addJoint(std::string name);
     std::shared_ptr<IMUHandle> addIMU(std::string parentLink, std::string name);

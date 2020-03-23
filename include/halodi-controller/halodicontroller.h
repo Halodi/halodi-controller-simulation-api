@@ -6,6 +6,15 @@
 namespace halodi_controller
 {
 
+struct ControllerConfiguration
+{
+    std::string workingDirectory = ".";
+    std::string classPath = "";
+    std::string mainClass = "";
+
+    std::string vmOptions = "";
+};
+
 class JointHandle
 {
 public:
@@ -112,7 +121,7 @@ public:
          * @brief HalodiController Create a new Halodi Controller
          * @param classpath Path to controller jar
          */
-    static std::shared_ptr<HalodiController> create(std::string classpath);
+    static std::shared_ptr<HalodiController> create(ControllerConfiguration& configuration);
 
 
     /**
