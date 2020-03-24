@@ -6,6 +6,9 @@
 #include "gazebo/gazebo.hh"
 #include "gazebo/common/common.hh"
 #include "gazebo/physics/physics.hh"
+#include "gazebo/sensors/SensorManager.hh"
+#include "gazebo/sensors/Sensor.hh"
+#include "gazebo/sensors/sensors.hh"
 
 #include "halodi-controller/halodicontroller.h"
 
@@ -45,14 +48,73 @@ public:
         gazeboJoint->SetDamping(0, controllerJoint->getDampingScale());
     }
 
-    virtual ~GazeboJointHandle()
-    {
-    }
-
 private:
     std::shared_ptr<JointHandle> controllerJoint;
     physics::JointPtr gazeboJoint;
 };
+
+
+class GazeboIMUhandle : public GazeboHandle
+{
+public:
+
+    GazeboIMUhandle(std::shared_ptr<IMUHandle> controllerIMU_, sensors::ImuSensorPtr gazeboIMU_) :
+        controllerIMU(controllerIMU_),
+        gazeboIMU(gazeboIMU_)
+    {
+
+    }
+
+    void read()
+    {
+        ignition::math::Quaterniond orientation = gazeboIMU->Orientation();
+        controllerIMU->setOrientationQuaternion(orientation.X(), orientation.Y(), orientation.Z(), orientation.W());
+
+        ignition::math::Vector3d accel = gazeboIMU->LinearAcceleration(false);
+        controllerIMU->setLinearAcceleration(accel.X(), accel.Y(), accel.Z());
+
+        ignition::math::Vector3d gyro = gazeboIMU->AngularVelocity(false);
+        controllerIMU->setAngularVelocity(gyro.X(), gyro.Y(), gyro.Z());
+
+    }
+    void write()
+    {
+    }
+
+private:
+    std::shared_ptr<IMUHandle> controllerIMU;
+    sensors::ImuSensorPtr gazeboIMU;
+};
+
+class GazeboForceTorqueSensorHandle : public GazeboHandle
+{
+public:
+
+    GazeboForceTorqueSensorHandle(std::shared_ptr<ForceTorqueSensorHandle> controllerForceTorqueSensor_, sensors::ForceTorqueSensorPtr gazeboForceTorqueSensor_) :
+        controllerForceTorqueSensor(controllerForceTorqueSensor_),
+        gazeboForceTorqueSensor(gazeboForceTorqueSensor_)
+    {
+
+    }
+
+    void read()
+    {
+        ignition::math::Vector3d force = gazeboForceTorqueSensor->Force();
+        controllerForceTorqueSensor->setForce(force.X(), force.Y(), force.Z());
+
+        ignition::math::Vector3d torque = gazeboForceTorqueSensor->Torque();
+        controllerForceTorqueSensor->setTorque(torque.X(), torque.Y(), torque.Z());
+
+    }
+    void write()
+    {
+    }
+
+private:
+    std::shared_ptr<ForceTorqueSensorHandle> controllerForceTorqueSensor;
+    sensors::ForceTorqueSensorPtr gazeboForceTorqueSensor;
+};
+
 
 
 
@@ -76,16 +138,27 @@ public:
 
             for(auto &joint : this->model->GetJoints())
             {
-                if(joint->DOF() == 1)
-                {
+                addJoint(joint);
+            }
 
-                    auto controllerJoint = controller->addJoint(joint->GetName());
-                    updateables.push_back(std::make_shared<GazeboJointHandle>(controllerJoint, joint));
-                }
-                else
+
+            sensors::SensorManager* mgr = sensors::SensorManager::Instance();
+
+            for(sensors::SensorPtr &sensor : mgr->GetSensors())
+            {
+                std::cerr << sensor->Type() << std::endl;
+
+
+                if("imu" == sensor->Type())
                 {
-                    std::cerr << joint->GetName() << " is not a OneDoFJoint, ignoring.";
+                    addIMU(sensor);
                 }
+                else if ("force_torque" == sensor->Type())
+                {
+                    addForceTorqueSensor(sensor);
+                }
+
+
             }
 
 
@@ -159,6 +232,49 @@ public:
 
 
 private:
+
+    void addJoint(physics::JointPtr joint)
+    {
+        if(joint->DOF() == 1)
+        {
+
+            auto controllerJoint = controller->addJoint(joint->GetName());
+            updateables.push_back(std::make_shared<GazeboJointHandle>(controllerJoint, joint));
+        }
+        else
+        {
+            std::cerr << joint->GetName() << " is not a OneDoFJoint, ignoring.";
+        }
+    }
+
+    void addIMU(sensors::SensorPtr sensor)
+    {
+        sensors::ImuSensorPtr imuSensor = std::dynamic_pointer_cast<sensors::ImuSensor>(sensor);
+
+        if(!imuSensor)
+        {
+            std::cerr << sensor->Name() << " is not of type ImuSensor" << std::endl;
+            return;
+        }
+
+        auto controllerIMU = controller->addIMU(imuSensor->ParentName(), imuSensor->Name());
+        updateables.push_back(std::make_shared<GazeboIMUhandle>(controllerIMU, imuSensor));
+    }
+
+    void addForceTorqueSensor(sensors::SensorPtr sensor)
+    {
+        sensors::ForceTorqueSensorPtr forceTorqueSensor = std::dynamic_pointer_cast<sensors::ForceTorqueSensor>(sensor);
+
+        if(!forceTorqueSensor)
+        {
+            std::cerr << sensor->Name() << " is not of type ForceTorqueSensor" << std::endl;
+            return;
+        }
+
+        auto controllerForceTorqueSensor = controller->addForceTorqueSensor(forceTorqueSensor->ParentName(), forceTorqueSensor->Name());
+        updateables.push_back(std::make_shared<GazeboForceTorqueSensorHandle>(controllerForceTorqueSensor, forceTorqueSensor));
+    }
+
 
     std::shared_ptr<HalodiController> controller;
 
