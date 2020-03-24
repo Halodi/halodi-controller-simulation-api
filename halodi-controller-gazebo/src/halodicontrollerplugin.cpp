@@ -18,8 +18,8 @@ namespace halodi_controller
 class GazeboHandle
 {
 public:
-    virtual void read();
-    virtual void write();
+    virtual void read() = 0;
+    virtual void write() = 0;
 };
 
 class GazeboJointHandle : public GazeboHandle

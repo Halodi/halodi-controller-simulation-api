@@ -51,4 +51,6 @@ install(DIRECTORY
 )
 
 
+ament_export_libraries(halodi-controller-gazebo)
+
 ament_package()

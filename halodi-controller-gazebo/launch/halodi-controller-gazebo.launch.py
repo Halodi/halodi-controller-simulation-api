@@ -11,9 +11,19 @@ from launch.substitutions import ThisLaunchFileDir
 from ament_index_python.packages import get_package_share_directory
 
 
+
+from scripts import GazeboRosPaths
+
 def generate_launch_description():
     gazebo_package_prefix = get_package_share_directory('gazebo_ros')
     package_prefix = get_package_share_directory('halodi-controller-gazebo')
+    
+    
+    model, plugin, media = GazeboRosPaths.get_paths()
+    
+    print(model)
+    print(plugin)
+    print(media)
     
     return LaunchDescription([
         

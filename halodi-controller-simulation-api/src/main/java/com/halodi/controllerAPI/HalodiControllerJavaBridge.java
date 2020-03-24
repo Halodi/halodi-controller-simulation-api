@@ -80,7 +80,7 @@ public class HalodiControllerJavaBridge
       for(EffortJointHandle joint : joints.values())
       {
          System.out.println(joint.getName() + " q: " + joint.getPosition());
-         joint.setDesiredEffort(time);
+         joint.setDesiredEffort(0.0);
       }
       
    }
