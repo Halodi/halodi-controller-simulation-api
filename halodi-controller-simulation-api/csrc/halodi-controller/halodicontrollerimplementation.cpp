@@ -92,4 +92,18 @@ void HalodiControllerImplementation::reset()
     jReset->callVoidMethod(bridge);
 }
 
+void HalodiControllerImplementation::attachCurrentThread()
+{
+    vm->attachCurrentThread();
+}
+
+void HalodiControllerImplementation::deattachCurrentThread()
+{
+    vm->detachCurrentThread();
+}
+
+HalodiControllerImplementation::~HalodiControllerImplementation()
+{
+}
+
 }

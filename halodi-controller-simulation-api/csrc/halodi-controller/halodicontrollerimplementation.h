@@ -21,6 +21,11 @@ public:
     void update(long long timeInNanoseconds, long long duration);
     void reset();
 
+    void attachCurrentThread();
+    void deattachCurrentThread();
+
+
+    virtual ~HalodiControllerImplementation();
 
 private:
     std::shared_ptr<JavaVirtualMachine> vm;

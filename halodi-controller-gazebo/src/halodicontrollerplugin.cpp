@@ -45,6 +45,10 @@ public:
         gazeboJoint->SetDamping(0, controllerJoint->getDampingScale());
     }
 
+    virtual ~GazeboJointHandle()
+    {
+    }
+
 private:
     std::shared_ptr<JointHandle> controllerJoint;
     physics::JointPtr gazeboJoint;
@@ -58,8 +62,6 @@ public:
     void Load(physics::ModelPtr _model, sdf::ElementPtr /*_sdf*/)
     {
         this->model = _model;
-
-
 
         ControllerConfiguration config;
 
@@ -89,8 +91,10 @@ public:
 
             if(controller->initialize())
             {
+                firstTick = true;
                 this->updateConnection = event::Events::ConnectWorldUpdateBegin(
                             std::bind(&HalodiControllerPlugin::OnUpdate, this));
+
             }
             else
             {
@@ -107,6 +111,14 @@ public:
 
     void OnUpdate()
     {
+        if(firstTick)
+        {
+            // Make sure this thread is attached to the controller
+            controller->attachCurrentThread();
+            firstTick = false;
+        }
+
+
         for(auto updatable : updateables)
         {
             updatable->read();
@@ -118,6 +130,8 @@ public:
         long long rawTime = ((long long)common::Time::nsInSec) * ((long long)time.sec) + ((long long) time.nsec);
         long long dt = lastUpdateTime - rawTime;
 
+
+
         controller->update(rawTime, dt);
 
 
@@ -127,9 +141,20 @@ public:
         }
 
         lastUpdateTime = rawTime;
+
     }
 
+    void Reset()
+    {
+        firstTick = true;
+    }
 
+    virtual ~HalodiControllerPlugin()
+    {
+        // Stop generating update() calls
+        updateConnection.reset();
+
+    }
 
 
 
@@ -148,6 +173,9 @@ private:
 
 
     long long lastUpdateTime = 0;
+
+    bool firstTick = true;
+
 };
 
 GZ_REGISTER_MODEL_PLUGIN(HalodiControllerPlugin)

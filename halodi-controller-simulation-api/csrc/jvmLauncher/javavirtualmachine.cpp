@@ -31,12 +31,12 @@ JNIEnv* JavaVirtualMachine::getEnv()
 
     if(!jvm)
     {
-        return nullptr;
+        throw std::runtime_error("JVM Not started");
     }
     jvm->GetEnv((void**) &ret, JNI_VERSION_1_6);
     if(!ret)
     {
-        return nullptr;
+        throw std::runtime_error("Cannot get env from JVM. Make sure the current thread is attached.");
     }
 
     return ret;
@@ -50,7 +50,7 @@ void JavaVirtualMachine::attachCurrentThread()
     }
 
     JNIEnv* tmp;
-    jvm->AttachCurrentThread((void**)&tmp, 0);
+    jvm->AttachCurrentThreadAsDaemon((void**)&tmp, 0);
 }
 
 void JavaVirtualMachine::detachCurrentThread()
@@ -77,6 +77,9 @@ JavaVirtualMachine::JavaVirtualMachine(std::string workingDirectory, std::string
         std::getline(vmOptionsTokens, option, ' ');
         options.push_back(option);
     }
+
+    // Disable signal handling by the VM
+    options.push_back("-Xrs");
 
 
     JavaVMOption* javaOptions = new JavaVMOption[options.size()];
@@ -127,12 +130,17 @@ JavaVirtualMachine::JavaVirtualMachine(std::string workingDirectory, std::string
         jvm = nullptr;
         throw std::runtime_error("JVM failed to start. Error code: " + res);
     }
+
+
+    // Re-attach current thread as daemon. This makes DestroyVM not hang if called from a different thread
+    detachCurrentThread();
+    attachCurrentThread();
+
 }
 
 jclass JavaVirtualMachine::getClass(std::string className)
 {
     JNIEnv* env = getEnv();
-    if(!env) throw std::runtime_error("Cannot get env");
 
     std::string classNameCopy(className);
     std::replace (classNameCopy.begin(), classNameCopy.end(), '.', '/');
@@ -156,7 +164,6 @@ std::shared_ptr<StaticJavaMethod> JavaVirtualMachine::getStaticJavaMethod(std::s
 {
 
     JNIEnv* env = getEnv();
-    if(!env) throw std::runtime_error("Cannot get env");
 
     jclass cls = getClass(className);
 
@@ -180,7 +187,6 @@ std::shared_ptr<JavaMethod> JavaVirtualMachine::getJavaMethod(std::string classN
 {
 
     JNIEnv* env = getEnv();
-    if(!env) throw std::runtime_error("Cannot get env");
 
     jclass cls = getClass(className);
 
@@ -198,7 +204,6 @@ std::shared_ptr<JavaMethod> JavaVirtualMachine::getJavaMethod(std::string classN
 void JavaVirtualMachine::registerNativeMethod(std::string className, std::string methodName, std::string signature, void *functionPointer)
 {
     JNIEnv* env = getEnv();
-    if(!env) throw std::runtime_error("Cannot get env");
 
     jclass cls = getClass(className);
 
@@ -221,7 +226,6 @@ void JavaVirtualMachine::registerNativeMethod(std::string className, std::string
 bool JavaVirtualMachine::isAssignableFrom(std::string subclass, std::string superclass)
 {
     JNIEnv* env = getEnv();
-    if(!env) throw std::runtime_error("Cannot get env");
 
     jclass sub = getClass(subclass);
     jclass sup = getClass(superclass);
@@ -240,8 +244,10 @@ JavaVirtualMachine::~JavaVirtualMachine()
 {
     if(!jvm)
     {
+        std::cerr << "Cannot shutdown JVM. JVM not started" << std::endl;
         return;
     }
+
     jint res = jvm->DestroyJavaVM();
     displayJNIError("Stopping Java VM", res);
 
@@ -265,17 +271,23 @@ JavaMethod::JavaMethod(std::shared_ptr<JavaVirtualMachine> launcher_, jclass cla
 JavaMethod::~JavaMethod()
 {
 
-    JNIEnv* env = launcher->getEnv();
-    if(env)
+    try
     {
+        // Attach the current thread to the JVM to be able to destroy this object
+        launcher->attachCurrentThread();
+
+        JNIEnv* env = launcher->getEnv();
         env->DeleteGlobalRef(clazz);
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
     }
 }
 
 void JavaMethod::callVoidMethod(std::shared_ptr<JavaObject> obj, ...)
 {
     JNIEnv* env = launcher->getEnv();
-    if(!env) throw std::runtime_error("Cannot get env");
 
     if(env->IsInstanceOf(obj->native(), clazz))
     {
@@ -293,7 +305,6 @@ void JavaMethod::callVoidMethod(std::shared_ptr<JavaObject> obj, ...)
 void* JavaMethod::callBytebufferMethod(std::shared_ptr<JavaObject> obj, int minimumCapacity,...)
 {
     JNIEnv* env = launcher->getEnv();
-    if(!env) throw std::runtime_error("Cannot get env");
 
     if(env->IsInstanceOf(obj->native(), clazz))
     {
@@ -324,7 +335,6 @@ void* JavaMethod::callBytebufferMethod(std::shared_ptr<JavaObject> obj, int mini
 jboolean JavaMethod::callBooleanMethod(std::shared_ptr<JavaObject> obj, ...)
 {
     JNIEnv* env = launcher->getEnv();
-    if(!env) throw std::runtime_error("Cannot get env");
 
     bool returnValue = false;
     if(env->IsInstanceOf(obj->native(), clazz))
@@ -345,7 +355,6 @@ jboolean JavaMethod::callBooleanMethod(std::shared_ptr<JavaObject> obj, ...)
 std::shared_ptr<JavaObject> JavaMethod::createObject(jargument_t arg, ...)
 {
     JNIEnv* env = launcher->getEnv();
-    if(!env) throw std::runtime_error("Cannot get env");
 
 
     va_list arglist;
@@ -373,16 +382,23 @@ StaticJavaMethod::StaticJavaMethod(std::shared_ptr<JavaVirtualMachine> launcher_
 
 StaticJavaMethod::~StaticJavaMethod()
 {
-    JNIEnv* env = launcher->getEnv();
-    if(!env) return;
+    try
+    {
+        // Attach the current thread to the JVM to be able to destroy this object
+        launcher->attachCurrentThread();
 
-    env->DeleteGlobalRef(clazz);
+        JNIEnv* env = launcher->getEnv();
+        env->DeleteGlobalRef(clazz);
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+    }
 }
 
 void StaticJavaMethod::callVoidMethod(jargument_t arg, ...)
 {
     JNIEnv* env = launcher->getEnv();
-    if(!env) throw std::runtime_error("Cannot get env");
 
     va_list arglist;
     va_start(arglist, arg);
@@ -401,10 +417,18 @@ JavaObject::JavaObject(std::shared_ptr<JavaVirtualMachine> launcher_, jobject ob
 
 JavaObject::~JavaObject()
 {
-    JNIEnv* env = launcher->getEnv();
-    if(!env) return;
+    try
+    {
+        // Attach the current thread to the JVM to be able to destroy this object
+        launcher->attachCurrentThread();
 
-    env->DeleteGlobalRef(object);
+        JNIEnv* env = launcher->getEnv();
+        env->DeleteGlobalRef(object);
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+    }
 }
 
 JavaString::JavaString(std::shared_ptr<JavaVirtualMachine> launcher_, std::string string_) :
@@ -423,10 +447,18 @@ JavaString::JavaString(std::shared_ptr<JavaVirtualMachine> launcher_, std::strin
 
 JavaString::~JavaString()
 {
-    JNIEnv* env = launcher->getEnv();
-    if(!env) return;
+    try
+    {
+        if(!jdata) return;
 
-    if(!jdata) return;
+        // Attach the current thread to the JVM to be able to destroy this object
+        launcher->attachCurrentThread();
 
-    env->DeleteGlobalRef(jdata);
+        JNIEnv* env = launcher->getEnv();
+        env->DeleteGlobalRef(jdata);
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+    }
 }

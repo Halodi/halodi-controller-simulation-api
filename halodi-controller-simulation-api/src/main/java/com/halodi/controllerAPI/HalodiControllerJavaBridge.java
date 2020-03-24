@@ -75,11 +75,10 @@ public class HalodiControllerJavaBridge
    
    void updateFromNative(long time, long duration)
    {
-      System.out.println("Time: " + time + "; dt: " + duration);
+      //System.out.println("Time: " + time + "; dt: " + duration);
       
       for(EffortJointHandle joint : joints.values())
       {
-         System.out.println(joint.getName() + " q: " + joint.getPosition());
          joint.setDesiredEffort(0.0);
       }
       

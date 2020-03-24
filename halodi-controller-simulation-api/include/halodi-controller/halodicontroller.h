@@ -174,6 +174,24 @@ public:
     virtual void reset() = 0;
 
 
+    /**
+     * @brief attachCurrentThread Attach the current thread to the controller.
+     *
+     * The current thread has to be attached to the controller to be able to interact with the controller.
+     *
+     * Subsequent calls are no-ops
+     */
+    virtual void attachCurrentThread() = 0;
+
+    /**
+     * @brief deattachCurrentThread
+     *
+     * When possible, detach a thread when not used anymore.
+     *
+     * Note: Detatching and re-attaching is expensive, avoid as much as possible.
+     */
+    virtual void deattachCurrentThread() = 0;
+
 };
 
 }
