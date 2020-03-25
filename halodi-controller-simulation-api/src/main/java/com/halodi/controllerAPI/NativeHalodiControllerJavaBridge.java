@@ -60,8 +60,10 @@ public abstract class NativeHalodiControllerJavaBridge implements HalodiControll
    boolean initFromNative()
    {
       try
-      {
+      {        
          init();
+         
+         
          return true;
       }
       catch (Throwable t)
@@ -95,6 +97,11 @@ public abstract class NativeHalodiControllerJavaBridge implements HalodiControll
       {
          t.printStackTrace();
       }
+   }
+   
+   void shutdownFromNative()
+   {
+      stop();  
    }
    
    double getInitialJointAngleFromNative(String name)

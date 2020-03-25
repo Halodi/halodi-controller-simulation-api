@@ -22,5 +22,10 @@ public interface HalodiControllerJavaBridge
 
    }
    
+   /**
+    * Stop all threads so the plugin can shutdown.
+    */
+   void stop();
+   
    double getInitialJointAngle(String name);
 }

@@ -39,6 +39,7 @@ private:
     std::shared_ptr<JavaMethod> jInitialize;
     std::shared_ptr<JavaMethod> jUpdate;
     std::shared_ptr<JavaMethod> jReset;
+    std::shared_ptr<JavaMethod> jShutdown;
 
 };
 

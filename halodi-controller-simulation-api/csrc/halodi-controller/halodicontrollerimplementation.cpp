@@ -45,6 +45,7 @@ HalodiControllerImplementation::HalodiControllerImplementation(ControllerConfigu
     jInitialize = vm->getJavaMethod(mainClass, "initFromNative", "()Z");
     jUpdate = vm->getJavaMethod(mainClass, "updateFromNative", "(JJ)V");
     jReset = vm->getJavaMethod(mainClass, "resetFromNative", "()V");
+    jShutdown = vm->getJavaMethod(mainClass, "shutdownFromNative", "()V");
 }
 
 std::shared_ptr<JointHandle> HalodiControllerImplementation::addJoint(std::string name)
@@ -102,6 +103,8 @@ void HalodiControllerImplementation::deattachCurrentThread()
 
 HalodiControllerImplementation::~HalodiControllerImplementation()
 {
+    vm->attachCurrentThread();
+    jShutdown->callVoidMethod(bridge);
 }
 
 }
