@@ -40,7 +40,7 @@ public:
     {
         controllerJoint->setPosition(gazeboJoint->Position());
         controllerJoint->setVelocity(gazeboJoint->GetVelocity(0));
-        controllerJoint->setMeasuredEffort(0.0);
+        controllerJoint->setMeasuredEffort(gazeboJoint->GetForce(0));
     }
     void write()
     {
@@ -146,9 +146,6 @@ public:
 
             for(sensors::SensorPtr &sensor : mgr->GetSensors())
             {
-                std::cerr << sensor->Type() << std::endl;
-
-
                 if("imu" == sensor->Type())
                 {
                     addIMU(sensor);
@@ -233,12 +230,25 @@ public:
 
 private:
 
+    std::string removeScope(std::string scopedName)
+    {
+        size_t lastDelim = scopedName.rfind("::");
+
+        if(lastDelim < scopedName.npos)
+        {
+            return scopedName.substr(lastDelim + 2);
+        }
+        else
+        {
+            return scopedName;
+        }
+    }
+
     void addJoint(physics::JointPtr joint)
     {
         if(joint->DOF() == 1)
         {
-
-            auto controllerJoint = controller->addJoint(joint->GetName());
+            auto controllerJoint = controller->addJoint(removeScope(joint->GetName()));
             updateables.push_back(std::make_shared<GazeboJointHandle>(controllerJoint, joint));
         }
         else
@@ -257,7 +267,7 @@ private:
             return;
         }
 
-        auto controllerIMU = controller->addIMU(imuSensor->ParentName(), imuSensor->Name());
+        auto controllerIMU = controller->addIMU(removeScope(imuSensor->ParentName()), removeScope(imuSensor->Name()));
         updateables.push_back(std::make_shared<GazeboIMUhandle>(controllerIMU, imuSensor));
     }
 
@@ -271,7 +281,7 @@ private:
             return;
         }
 
-        auto controllerForceTorqueSensor = controller->addForceTorqueSensor(forceTorqueSensor->ParentName(), forceTorqueSensor->Name());
+        auto controllerForceTorqueSensor = controller->addForceTorqueSensor(removeScope(forceTorqueSensor->ParentName()), removeScope(forceTorqueSensor->Name()));
         updateables.push_back(std::make_shared<GazeboForceTorqueSensorHandle>(controllerForceTorqueSensor, forceTorqueSensor));
     }
 

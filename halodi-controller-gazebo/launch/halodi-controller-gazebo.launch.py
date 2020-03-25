@@ -37,8 +37,11 @@ def generate_launch_description():
             default_value='true',
             description='Enable verbosity',
             ),
-        DeclareLaunchArgument('pause', default_value='true',
-                              description='Default to paused state.'),
+        
+        DeclareLaunchArgument('init', default_value='false',
+                              description='Set "false" not to load "libgazebo_ros_init.so"'),
+        DeclareLaunchArgument('factory', default_value='false',
+                              description='Set "false" not to load "libgazebo_ros_factory.so"'),
         
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(os.path.join(gazebo_package_prefix, 'launch', 'gzserver.launch.py'))
