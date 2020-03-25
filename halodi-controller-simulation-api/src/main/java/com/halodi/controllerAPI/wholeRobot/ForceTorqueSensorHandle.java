@@ -15,8 +15,4 @@ public interface ForceTorqueSensorHandle
 
    double getFx();
 
-   String getName();
-
-   String getParentLink();
-
 }

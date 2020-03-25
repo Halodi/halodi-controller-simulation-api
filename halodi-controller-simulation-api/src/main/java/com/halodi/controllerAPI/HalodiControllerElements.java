@@ -13,8 +13,18 @@ public interface HalodiControllerElements
 
    EffortJointHandle getJoint(String name);
 
-   IMUHandle getIMU(String parentLink, String name);
+   default IMUHandle getIMU(String parentLink, String name)
+   {
+      return getIMU(createQualifiedName(parentLink, name));
+   }
 
-   ForceTorqueSensorHandle getForceTorqueSensor(String parentLink, String name);
+   IMUHandle getIMU(String qualifiedName);
+
+   default ForceTorqueSensorHandle getForceTorqueSensor(String parentLink, String name)
+   {
+      return getForceTorqueSensor(createQualifiedName(parentLink, name));
+   }
+   
+   ForceTorqueSensorHandle getForceTorqueSensor(String qualifiedName);
 
 }

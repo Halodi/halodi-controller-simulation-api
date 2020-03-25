@@ -22,9 +22,5 @@ public interface IMUHandle
    double getQ_y();
 
    double getQ_x();
-
-   String getName();
-   
-   String getParentLink();
    
 }

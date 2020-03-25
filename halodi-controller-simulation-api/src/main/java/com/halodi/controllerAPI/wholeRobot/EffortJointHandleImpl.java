@@ -44,7 +44,6 @@ public class EffortJointHandleImpl implements EffortJointHandle
       doubleBuffer.put(3, desiredEffort);
    }
 
-   @Override
    public String getName()
    {
       return jointName;

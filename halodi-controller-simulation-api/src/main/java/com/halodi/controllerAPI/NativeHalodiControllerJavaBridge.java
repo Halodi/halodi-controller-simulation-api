@@ -104,15 +104,15 @@ public abstract class NativeHalodiControllerJavaBridge implements HalodiControll
    }
 
    @Override
-   public IMUHandle getIMU(String parentLink, String name)
+   public IMUHandle getIMU(String qualifiedName)
    {
-      return imus.get(HalodiControllerElements.createQualifiedName(parentLink, name));
+      return imus.get(qualifiedName);
    }
 
    @Override
-   public ForceTorqueSensorHandle getForceTorqueSensor(String parentLink, String name)
+   public ForceTorqueSensorHandle getForceTorqueSensor(String qualifiedName)
    {
-      return forceTorqueSensors.get(HalodiControllerElements.createQualifiedName(parentLink, name));
+      return forceTorqueSensors.get(qualifiedName);
    }
-
+   
 }

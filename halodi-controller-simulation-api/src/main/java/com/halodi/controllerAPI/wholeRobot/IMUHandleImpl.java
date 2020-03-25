@@ -27,7 +27,6 @@ public class IMUHandleImpl implements IMUHandle
 
    }
    
-   @Override
    public String getName()
    {
       return name;
@@ -94,7 +93,6 @@ public class IMUHandleImpl implements IMUHandle
       return doubleBuffer.get(6);
    }
 
-   @Override
    public String getParentLink()
    {
       return parentLink;

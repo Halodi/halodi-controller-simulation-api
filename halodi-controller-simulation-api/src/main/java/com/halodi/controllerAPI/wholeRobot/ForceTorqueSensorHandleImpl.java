@@ -25,7 +25,6 @@ public class ForceTorqueSensorHandleImpl implements ForceTorqueSensorHandle
    }
    
 
-   @Override
    public String getName()
    {
       return name;
@@ -67,7 +66,6 @@ public class ForceTorqueSensorHandleImpl implements ForceTorqueSensorHandle
       return doubleBuffer.get(5);
    }
 
-   @Override
    public String getParentLink()
    {
       return parentLink;
