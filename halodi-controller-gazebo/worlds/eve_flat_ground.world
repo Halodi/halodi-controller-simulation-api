@@ -11,9 +11,16 @@
       <uri>model://sun</uri>
     </include>
 
+    <physics name='default_physics' default='true' type='ode'>
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+    </physics>
+
     
     
     <model name="eve_r3">
+        <pose>0 0 0.9073 0 0 0</pose>
         <include>
             <uri>model://eve_r3_description</uri>
         </include>

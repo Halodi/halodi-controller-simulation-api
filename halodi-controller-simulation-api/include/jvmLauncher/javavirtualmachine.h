@@ -3,6 +3,7 @@
 #include <jni.h>
 #include <string>
 #include <memory>
+#include <vector>
 
 class JavaVirtualMachine;
 class JavaObject;
@@ -20,13 +21,17 @@ public:
     void callVoidMethod(std::shared_ptr<JavaObject> obj, ...);
     void* callBytebufferMethod(std::shared_ptr<JavaObject> obj, int minimumCapacity, ...);
     jboolean callBooleanMethod(std::shared_ptr<JavaObject> obj, ...);
+    jboolean callDoubleMethod(std::shared_ptr<JavaObject> obj, ...);
 
     std::shared_ptr<JavaObject> createObject(jargument_t arg, ...);
 
 private:
+
+
     std::shared_ptr<JavaVirtualMachine> launcher;
     jclass clazz;
     jmethodID methodID;
+
 
 };
 
@@ -81,7 +86,14 @@ private:
 class JavaVirtualMachine : public std::enable_shared_from_this<JavaVirtualMachine>
 {
 private:
-    JavaVirtualMachine(std::string workingDirectory, std::string vmArguments);
+#ifdef _WIN32
+    static const char classpathSeperator = ';';
+#else
+    static const char classpathSeperator = ':';
+#endif
+
+    JavaVirtualMachine(std::string workingDirectory, std::string classpath, std::string vmArguments);
+    std::string expandClasspath(std::string classpath);
 
 
     JavaVM *jvm;
@@ -92,7 +104,7 @@ private:
 
 public:
 
-    static std::shared_ptr<JavaVirtualMachine> startVM(std::string workingDirectory, std::string vmArguments);
+    static std::shared_ptr<JavaVirtualMachine> startVM(std::string workingDirectory, std::string classpath, std::string vmArguments);
 
 
     std::shared_ptr<JavaMethod> getJavaMethod(std::string className, std::string method, std::string signature);

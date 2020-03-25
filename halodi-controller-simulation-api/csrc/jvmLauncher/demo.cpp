@@ -32,7 +32,7 @@ timespec diff(timespec start, timespec end)
 
 int main(int argc, char *argv[])
 {
-    std::shared_ptr<JavaVirtualMachine> launcher = JavaVirtualMachine::startVM(".", "-Djava.class.path=/home/jesper/git/halodi/halodi-controller-simulation-api/bin/main");
+    std::shared_ptr<JavaVirtualMachine> launcher = JavaVirtualMachine::startVM(".", "~/eve/lib/*","");
 
 
     launcher->registerNativeMethod("com.halodi.controllerAPI.launcher.TestJVMLaunchCallback", "callVoidFunctionWithString", "(Ljava/lang/String;)V", (void *)&callVoidFunctionWithString);

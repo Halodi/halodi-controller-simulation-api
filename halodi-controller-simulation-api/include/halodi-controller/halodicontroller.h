@@ -56,6 +56,13 @@ public:
              * @return Desired damping scale on this joint, between 0 - 1
              */
     virtual double getDampingScale() = 0;
+
+
+    /**
+     * @brief getInitialAngle Get the intial angle on start for the controller
+     * @return Initial angle [rad]
+     */
+    virtual double getInitialAngle() = 0;
 };
 
 class IMUHandle

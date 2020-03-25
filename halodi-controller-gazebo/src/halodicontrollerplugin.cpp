@@ -127,8 +127,8 @@ public:
 
         ControllerConfiguration config;
 
-        config.mainClass = "com.halodi.controllerAPI.HalodiControllerJavaBridge";
-        config.classPath = "/home/jesper/eve/lib/*";
+        config.mainClass = "com.halodi.eve.simulation.NativePluginEveSimulation";
+        config.classPath = "~/eve/lib/*";
 
         try
         {

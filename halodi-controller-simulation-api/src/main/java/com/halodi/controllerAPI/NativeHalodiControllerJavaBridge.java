@@ -96,6 +96,20 @@ public abstract class NativeHalodiControllerJavaBridge implements HalodiControll
          t.printStackTrace();
       }
    }
+   
+   double getInitialJointAngleFromNative(String name)
+   {
+      try
+      {
+         return getInitialJointAngle(name);
+      }
+      catch (Throwable t)
+      {
+         t.printStackTrace();
+         return 0.0;
+      }
+   }
+      
 
    @Override
    public EffortJointHandle getJoint(String name)

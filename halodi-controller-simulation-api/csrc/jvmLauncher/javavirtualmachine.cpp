@@ -11,6 +11,9 @@
 
 #include <stdexcept>
 
+#include <glob.h>
+
+
 void JavaVirtualMachine::displayJNIError(std::string prefix, int error)
 {
     switch(error)
@@ -64,7 +67,58 @@ void JavaVirtualMachine::detachCurrentThread()
 }
 
 
-JavaVirtualMachine::JavaVirtualMachine(std::string workingDirectory, std::string vmOptions)
+std::string JavaVirtualMachine::expandClasspath(std::string classpath)
+{
+
+
+
+
+    std::istringstream classpathTokens(classpath);
+    std::vector<std::string> classpathElements;
+
+    while(!classpathTokens.eof())
+    {
+        std::string classpathElement;
+        std::getline(classpathTokens, classpathElement, classpathSeperator);
+
+        if(!classpathElement.empty())
+        {
+            glob_t glob_result = {};
+
+            int ret = glob(classpathElement.c_str(), GLOB_TILDE, NULL, &glob_result);
+            if(ret == 0)
+            {
+                for(size_t i = 0; i < glob_result.gl_pathc; ++i)
+                {
+                    classpathElements.push_back(std::string(glob_result.gl_pathv[i]));
+                }
+            }
+            else
+            {
+                classpathElements.push_back(classpathElement);
+            }
+
+            globfree(&glob_result);
+        }
+    }
+
+
+    if(classpathElements.empty())
+    {
+        return "";
+    }
+    else
+    {
+        std::string combinedClassPath = *classpathElements.begin();
+        std::for_each(std::next(classpathElements.begin()), classpathElements.end(), [&combinedClassPath] (const std::string& s) { combinedClassPath += classpathSeperator + s; });
+        return combinedClassPath;
+    }
+
+
+}
+
+
+JavaVirtualMachine::JavaVirtualMachine(std::string workingDirectory, std::string classpath, std::string vmOptions)
 {
     vmArguments.version = JNI_VERSION_1_6;
 
@@ -75,8 +129,15 @@ JavaVirtualMachine::JavaVirtualMachine(std::string workingDirectory, std::string
     {
         std::string option;
         std::getline(vmOptionsTokens, option, ' ');
-        options.push_back(option);
+
+        if(!option.empty())
+        {
+            options.push_back(option);
+        }
     }
+
+    // Set classpath
+    options.push_back("-Djava.class.path=" + expandClasspath(classpath));
 
     // Disable signal handling by the VM
     options.push_back("-Xrs");
@@ -91,7 +152,7 @@ JavaVirtualMachine::JavaVirtualMachine(std::string workingDirectory, std::string
 
     vmArguments.nOptions = (jint) options.size();
     vmArguments.options = javaOptions;
-    vmArguments.ignoreUnrecognized = JNI_TRUE;
+    vmArguments.ignoreUnrecognized = JNI_FALSE;
 
 
 
@@ -153,9 +214,9 @@ jclass JavaVirtualMachine::getClass(std::string className)
     return cls;
 }
 
-std::shared_ptr<JavaVirtualMachine> JavaVirtualMachine::startVM(std::string workingDirectory, std::string vmArguments)
+std::shared_ptr<JavaVirtualMachine> JavaVirtualMachine::startVM(std::string workingDirectory, std::string classpath, std::string vmArguments)
 {
-    JavaVirtualMachine* vm = new JavaVirtualMachine(workingDirectory, vmArguments);
+    JavaVirtualMachine* vm = new JavaVirtualMachine(workingDirectory, classpath, vmArguments);
     return std::shared_ptr<JavaVirtualMachine>(vm);
 }
 
@@ -352,6 +413,27 @@ jboolean JavaMethod::callBooleanMethod(std::shared_ptr<JavaObject> obj, ...)
     return returnValue;
 }
 
+jboolean JavaMethod::callDoubleMethod(std::shared_ptr<JavaObject> obj, ...)
+{
+    JNIEnv* env = launcher->getEnv();
+
+    bool returnValue = false;
+    if(env->IsInstanceOf(obj->native(), clazz))
+    {
+        va_list arglist;
+        va_start(arglist, obj);
+        returnValue = env->CallDoubleMethodV(obj->native(), methodID, arglist);
+        va_end(arglist);
+    }
+    else
+    {
+        throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": Unexpected object type");
+    }
+
+    return returnValue;
+}
+
+
 std::shared_ptr<JavaObject> JavaMethod::createObject(jargument_t arg, ...)
 {
     JNIEnv* env = launcher->getEnv();
@@ -370,7 +452,6 @@ std::shared_ptr<JavaObject> JavaMethod::createObject(jargument_t arg, ...)
         throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": Cannot create new object");
     }
 }
-
 
 
 StaticJavaMethod::StaticJavaMethod(std::shared_ptr<JavaVirtualMachine> launcher_, jclass clazz_, jmethodID methodID_) :

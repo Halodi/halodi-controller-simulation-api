@@ -37,6 +37,8 @@ def generate_launch_description():
             default_value='true',
             description='Enable verbosity',
             ),
+        DeclareLaunchArgument('pause', default_value='true',
+                              description='Default to paused state.'),
         
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(os.path.join(gazebo_package_prefix, 'launch', 'gzserver.launch.py'))

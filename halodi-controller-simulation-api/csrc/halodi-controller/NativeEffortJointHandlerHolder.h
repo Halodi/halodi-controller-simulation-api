@@ -9,7 +9,7 @@ namespace halodi_controller
     public:
         static const unsigned int size = 5;
 
-        NativeEffortJointHandleHolder(double* data_);
+        NativeEffortJointHandleHolder(double* data_, double initialAngle_);
 
         virtual ~NativeEffortJointHandleHolder();
 
@@ -25,8 +25,12 @@ namespace halodi_controller
 
        double getDampingScale();
 
+       double getInitialAngle();
+
     private:
 
         double* data;
+
+        double initialAngle;
     };
 }

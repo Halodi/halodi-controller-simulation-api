@@ -4,8 +4,9 @@
 namespace halodi_controller
 {
 
-    NativeEffortJointHandleHolder::NativeEffortJointHandleHolder(double *data_) :
-        data(data_)
+    NativeEffortJointHandleHolder::NativeEffortJointHandleHolder(double *data_, double initialAngle_) :
+        data(data_),
+        initialAngle(initialAngle_)
     {
 
     }
@@ -39,4 +40,12 @@ namespace halodi_controller
     {
         return data[4];
     }
+
+    double NativeEffortJointHandleHolder::getInitialAngle()
+    {
+        return initialAngle;
+    }
+
+
+
 }
