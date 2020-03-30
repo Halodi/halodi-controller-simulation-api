@@ -20,6 +20,7 @@ find_package(ament_cmake REQUIRED)
 find_package(gazebo REQUIRED)
 find_package(gazebo_ros REQUIRED)
 find_package(halodi-controller-simulation-api REQUIRED)
+find_package(ihmc-pub-sub REQUIRED)
 
 
 if(BUILD_TESTING)
