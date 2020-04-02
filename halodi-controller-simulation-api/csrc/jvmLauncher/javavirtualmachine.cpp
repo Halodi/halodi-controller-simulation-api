@@ -36,7 +36,7 @@ JNIEnv* JavaVirtualMachine::getEnv()
     {
         throw std::runtime_error("JVM Not started");
     }
-    jvm->GetEnv((void**) &ret, JNI_VERSION_1_6);
+    jvm->GetEnv((void**) &ret, JNI_VERSION_1_8);
     if(!ret)
     {
         throw std::runtime_error("Cannot get env from JVM. Make sure the current thread is attached.");
@@ -120,7 +120,7 @@ std::string JavaVirtualMachine::expandClasspath(std::string classpath)
 
 JavaVirtualMachine::JavaVirtualMachine(std::string workingDirectory, std::string classpath, std::string vmOptions)
 {
-    vmArguments.version = JNI_VERSION_1_6;
+    vmArguments.version = JNI_VERSION_1_8;
 
     std::istringstream vmOptionsTokens(vmOptions);
 
