@@ -2,6 +2,7 @@
 #include <memory>
 #include <iostream>
 #include <vector>
+#include <cstdlib>
 
 #include "gazebo/gazebo.hh"
 #include "gazebo/common/common.hh"
@@ -125,13 +126,27 @@ public:
     {
         this->model = _model;
 
-        ControllerConfiguration config;
 
-        config.mainClass = "com.halodi.eve.simulation.NativePluginEveSimulation";
-        config.classPath = "~/eve/lib/*";
 
         try
         {
+
+            ControllerConfiguration config;
+
+            config.mainClass = "com.halodi.eve.simulation.NativePluginEveSimulation";
+
+
+
+            if(const char* halodi_classpath = std::getenv("HALODI_CONTROLLER_CLASSPATH"))
+            {
+                std::cout << "Loading controller from classpath: " << halodi_classpath << std::endl;
+                config.classPath = std::string(halodi_classpath);
+            }
+            else
+            {
+                throw std::runtime_error("Environment variable HALODI_CONTROLLER_CLASSPATH not set. Cannot start controller.");
+            }
+
 
             controller = HalodiController::create(config);
 

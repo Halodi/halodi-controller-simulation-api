@@ -21,20 +21,16 @@ def generate_launch_description():
         
     model, plugin, media = GazeboRosPaths.get_paths()
     
-    print(model)
-    print(plugin)
-    print(media)
+    halodi_controller_classpath = os.path.join(halodi_controller_prefix, "*.jar")
     
-    print(halodi_controller_prefix)
-    
-    #env = {'HALODI_CONTROLLER_DIRECTORY': halodi_controller_prefix };
+    os.environ["HALODI_CONTROLLER_CLASSPATH"] = halodi_controller_classpath;
     
     return LaunchDescription([
         
         DeclareLaunchArgument(
             'world',
             default_value=os.path.join(package_prefix, 'worlds' ,'eve_flat_ground.world'),
-            description='Set world to laucnh',
+            description='Set world to launch',
             ),
         DeclareLaunchArgument(
             'verbose',
