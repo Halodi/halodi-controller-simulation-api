@@ -12,6 +12,8 @@
 
   <license>Apache 2.0</license>
 
+  <depend>halodi-controller</depend>
+  
   <export>
     <build_type>ament_cmake</build_type>
   </export>

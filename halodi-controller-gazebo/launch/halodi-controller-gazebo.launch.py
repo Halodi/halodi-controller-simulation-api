@@ -17,13 +17,17 @@ from scripts import GazeboRosPaths
 def generate_launch_description():
     gazebo_package_prefix = get_package_share_directory('gazebo_ros')
     package_prefix = get_package_share_directory('halodi-controller-gazebo')
-    
-    
+    halodi_controller_prefix = get_package_share_directory('halodi-controller')
+        
     model, plugin, media = GazeboRosPaths.get_paths()
     
     print(model)
     print(plugin)
     print(media)
+    
+    print(halodi_controller_prefix)
+    
+    #env = {'HALODI_CONTROLLER_DIRECTORY': halodi_controller_prefix };
     
     return LaunchDescription([
         
