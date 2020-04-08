@@ -38,7 +38,7 @@ def generate_launch_description():
             description='Enable verbosity',
             ),
         
-        DeclareLaunchArgument('init', default_value='true',
+        DeclareLaunchArgument('init', default_value='false',
                               description='Set "false" not to load "libgazebo_ros_init.so"'),
         DeclareLaunchArgument('factory', default_value='false',
                               description='Set "false" not to load "libgazebo_ros_factory.so"'),
