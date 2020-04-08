@@ -11,6 +11,7 @@
     
   <depend>gazebo</depend>
   <depend>gazebo_ros</depend>
+  <depend>ihmc-pub-sub</depend>
   <depend>halodi-controller-simulation-api</depend>
   
     <exec_depend>launch_ros</exec_depend>
