@@ -16,7 +16,7 @@ develop with the EVE Gazebo simulation.
 2. Install the following:
   ```bash
   sudo apt-get update
-  sudo apt install git python3-colcon-common-extensions python3-vcstool swig3.0 openjdk-8-jdk xsltproc ros-eloquent-gazebo-ros-pkgs
+  sudo apt install git python3-colcon-common-extensions python3-vcstool swig3.0 xsltproc ros-eloquent-gazebo-ros-pkgs
   ```
 3. Create ROS 2 a workspace:
   ```bash
