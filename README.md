@@ -7,7 +7,7 @@ Prerequisites:
 * Ubuntu 18.04
 * A machine with graphics acceleration capability
 * Access to private Halodi repositories. E-mail support@halodi.com or your sales rep to request this.
-* (Recommended) An ssh-key for your Github account on your machine to make using vcs-tool easy. If you haven't set one up, see [these instructions](https://help.github.com/en/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
+* (Optional) An ssh-key for your Github account on your machine to make using vcs-tool easy. If you haven't set one up, see [these instructions](https://help.github.com/en/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
 
 The following steps describe the process for setting up your ROS 2 workspace to
 develop with the EVE Gazebo simulation.
