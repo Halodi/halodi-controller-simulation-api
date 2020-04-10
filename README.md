@@ -26,7 +26,7 @@ develop with the EVE Gazebo simulation.
   ```bash
   cd ~/eve_ws/src
   git clone git@github.com:Halodi/halodi-controller-simulation-api.git
-  vcs import < ./halodi-controller-simulation-api/eve_ws.yaml
+  vcs import < ./halodi-controller-simulation-api/eve_ws.repos
   ```
 5. Download the the lastest ROS2 Workspace EVE controller [here](https://github.com/Halodi/halodi-controller-build-system/releases/download/v0.2.0-ROS2/halodi-controller-linux64-0.1.0.tar.gz) to your Downloads folder. If you get a 404 error on Github, it's more likely you haven't been given repo access yet. Request it: support@halodi.com
 6. Extract it to your workspace:
@@ -34,7 +34,7 @@ develop with the EVE Gazebo simulation.
   cd ~/eve_ws/src
   tar -xzf ~/Downloads/halodi-controller-linux64-0.1.0.tar.gz
   ````
-7. Build and source the directory:
+7. Build and source the workspace:
   ```bash
   cd ~/eve_ws
   colcon build
