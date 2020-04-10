@@ -1,6 +1,8 @@
 # EVE Gazebo Simulation Workspace Setup
 will@halodi.com
 
+![eve_gazebo](./images/eve_gazebo_sim_ss.png)
+
 Prerequisites:
 * Ubuntu 18.04
 * A machine with graphics acceleration capability
@@ -27,7 +29,7 @@ develop with the EVE Gazebo simulation.
   vcs import < ./halodi-controller-simulation-api/eve_ws.yaml
   ```
 5. Download the the lastest ROS2 Workspace EVE controller [here](https://github.com/Halodi/halodi-controller-build-system/releases/download/v0.2.0-ROS2/halodi-controller-linux64-0.1.0.tar.gz) to your Downloads folder. If you get a 404 error on Github, it's more likely you haven't been given repo access yet. Request it: support@halodi.com
-6. Extract it your workspace:
+6. Extract it to your workspace:
   ```bash
   cd ~/eve_ws/src
   tar -xzf ~/Downloads/halodi-controller-linux64-0.1.0.tar.gz
