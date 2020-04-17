@@ -2,6 +2,8 @@
 
 This package provides a bridge between the Halodi controller written in Java and a generic C++ API.
 
+This code is based on [IHMC ROS Control](https://github.com/ihmcrobotics/ihmc-ros-control) and rewritten to be idependent off ROS Control. 
+
 ## Usage
 
 The api is available in a single header [halodicontroller.h](include/halodi-controller/halodicontroller.h).
