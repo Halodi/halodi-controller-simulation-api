@@ -38,9 +38,14 @@ def generate_launch_description():
             description='Enable verbosity',
             ),
         
+        # Note that the Halodi Controller publishes /clock and therefore conflicts with gazebo_ros_init
+        # Also, resetting the world state is not currently supported by the controller.
+        # Therefore, we disable the gazebo_ros_init plugin
         DeclareLaunchArgument('init', default_value='false',
                               description='Set "false" not to load "libgazebo_ros_init.so"'),
-        DeclareLaunchArgument('factory', default_value='false',
+        
+        
+        DeclareLaunchArgument('factory', default_value='true',
                               description='Set "false" not to load "libgazebo_ros_factory.so"'),
         
         IncludeLaunchDescription(
