@@ -112,7 +112,7 @@ std::string HalodiControllerImplementation::getControllerConfiguration()
     json += "\"workingDirectory\":\"" + vmConfig.workingDirectory + "\",";
     json += "\"classPath\":\"" + vmConfig.classPath + "\",";
     json += "\"mainClass\":\"" + vmConfig.mainClass + "\",";
-    json += "\"vmOptions\":\"" + vmConfig.vmOptions;
+    json += "\"vmOptions\":\"" + vmConfig.vmOptions + "\"";
 
     json += "}";
     return json;
