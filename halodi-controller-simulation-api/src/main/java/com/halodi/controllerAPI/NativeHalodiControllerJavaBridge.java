@@ -15,6 +15,7 @@ import com.halodi.controllerAPI.wholeRobot.IMUHandleImpl;
 public abstract class NativeHalodiControllerJavaBridge implements HalodiControllerJavaBridge, HalodiControllerElements
 {
    private boolean initialized;
+   private String controllerArguments;
    
    private final HashMap<String, EffortJointHandleImpl> joints = new HashMap<>();
    private final HashMap<String, IMUHandleImpl> imus = new HashMap<>();
@@ -90,6 +91,7 @@ public abstract class NativeHalodiControllerJavaBridge implements HalodiControll
       {        
          initialize(arguments);
          initialized = true;
+         this.controllerArguments = arguments;
          
          return true;
       }
@@ -185,10 +187,18 @@ public abstract class NativeHalodiControllerJavaBridge implements HalodiControll
       json.append('"');
       json.append(name);
       json.append('"');
+      json.append(':');
       
-      json.append("[\"");
-      json.append(elements.stream().collect(Collectors.joining("\", \"")));
-      json.append("\"]");
+      if(elements.size() > 0)
+      {
+         json.append("[\"");
+         json.append(elements.stream().collect(Collectors.joining("\", \"")));
+         json.append("\"]");
+      }
+      else
+      {
+         json.append("[]");
+      }
       
    }
    
@@ -203,7 +213,13 @@ public abstract class NativeHalodiControllerJavaBridge implements HalodiControll
       
       json.append("\"initialized\":\""); 
       json.append(initialized); 
-      json.append("\""); 
+      json.append("\"");
+      
+      json.append(',');
+      
+      json.append("\"arguments\":\"");
+      json.append(controllerArguments);
+      json.append("\"");
       
       json.append(',');
       
