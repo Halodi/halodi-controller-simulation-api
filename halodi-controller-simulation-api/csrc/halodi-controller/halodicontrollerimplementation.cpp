@@ -42,10 +42,12 @@ HalodiControllerImplementation::HalodiControllerImplementation(ControllerConfigu
     jGetInitialAngle = vm->getJavaMethod(mainClass, "getInitialJointAngleFromNative", "(Ljava/lang/String;)D");
     jAddIMU = vm->getJavaMethod(mainClass, "createIMUHandle", "(Ljava/lang/String;Ljava/lang/String;)Ljava/nio/ByteBuffer;");
     jAddForceTorqueSensor = vm->getJavaMethod(mainClass, "createForceTorqueSensorHandle", "(Ljava/lang/String;Ljava/lang/String;)Ljava/nio/ByteBuffer;");
-    jInitialize = vm->getJavaMethod(mainClass, "initFromNative", "()Z");
-    jUpdate = vm->getJavaMethod(mainClass, "updateFromNative", "(JJ)V");
-    jReset = vm->getJavaMethod(mainClass, "resetFromNative", "()V");
+    jInitialize = vm->getJavaMethod(mainClass, "initFromNative", "(Ljava/lang/String;)Z");
+    jStart = vm->getJavaMethod(mainClass, "startFromNative", "()Z");
+    jUpdate = vm->getJavaMethod(mainClass, "updateFromNative", "(JJ)Z");
+    jStop = vm->getJavaMethod(mainClass, "stopFromNative", "()Z");
     jShutdown = vm->getJavaMethod(mainClass, "shutdownFromNative", "()V");
+    jGetControllerDescription = vm->getJavaMethod(mainClass, "getControllerDescriptionFromNative", "()Ljava/lang/String;");
 }
 
 std::shared_ptr<JointHandle> HalodiControllerImplementation::addJoint(std::string name)
@@ -76,19 +78,30 @@ std::shared_ptr<ForceTorqueSensorHandle> HalodiControllerImplementation::addForc
     return std::make_shared<NativeForceTorqueSensorHandleHolder>(buffer);
 }
 
-bool HalodiControllerImplementation::initialize()
+bool HalodiControllerImplementation::initialize(std::string arguments)
 {
-    jInitialize->callBooleanMethod(bridge);
+    std::shared_ptr<JavaString> jArguments = vm->createJavaString(arguments);
+    return jInitialize->callBooleanMethod(bridge, jArguments->native());
 }
 
-void HalodiControllerImplementation::update(long long timeInNanoseconds, long long duration)
+bool HalodiControllerImplementation::start()
 {
-    jUpdate->callVoidMethod(bridge, timeInNanoseconds, duration);
+    return jStart->callBooleanMethod(bridge);
 }
 
-void HalodiControllerImplementation::reset()
+bool HalodiControllerImplementation::update(long long timeInNanoseconds, long long duration)
 {
-    jReset->callVoidMethod(bridge);
+    return jUpdate->callBooleanMethod(bridge, timeInNanoseconds, duration);
+}
+
+bool HalodiControllerImplementation::stop()
+{
+    return jStop->callBooleanMethod(bridge);
+}
+
+std::string HalodiControllerImplementation::getControllerDescription()
+{
+    return jGetControllerDescription->callStringMethod(bridge);
 }
 
 void HalodiControllerImplementation::attachCurrentThread()

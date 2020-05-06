@@ -17,9 +17,13 @@ public:
     std::shared_ptr<IMUHandle> addIMU(std::string parentLink, std::string name);
     std::shared_ptr<ForceTorqueSensorHandle> addForceTorqueSensor(std::string parentLink, std::string name);
 
-    bool initialize();
-    void update(long long timeInNanoseconds, long long duration);
-    void reset();
+    bool initialize(std::string arguments);
+
+    bool start();
+    bool update(long long timeInNanoseconds, long long duration);
+    bool stop();
+
+    std::string getControllerDescription();
 
     void attachCurrentThread();
     void deattachCurrentThread();
@@ -37,10 +41,12 @@ private:
     std::shared_ptr<JavaMethod> jAddIMU;
     std::shared_ptr<JavaMethod> jAddForceTorqueSensor;
     std::shared_ptr<JavaMethod> jInitialize;
+    std::shared_ptr<JavaMethod> jStart;
     std::shared_ptr<JavaMethod> jUpdate;
-    std::shared_ptr<JavaMethod> jReset;
+    std::shared_ptr<JavaMethod> jStop;
     std::shared_ptr<JavaMethod> jShutdown;
 
+    std::shared_ptr<JavaMethod> jGetControllerDescription;
 };
 
 

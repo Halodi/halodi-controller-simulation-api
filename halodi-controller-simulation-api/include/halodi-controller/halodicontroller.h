@@ -163,22 +163,48 @@ public:
          * @brief initialize Initialize the controller. Call after all handles are added to the controller.
          * @return false if the controller cannot initialize
          */
-    virtual bool initialize() = 0;
+    virtual bool initialize(std::string arguments) = 0;
+
+
+    /**
+     * @brief start Start the controller. Call after initialize.
+     * @return false if the controller cannot intiialize
+     */
+    virtual bool start() = 0;
 
     /**
          * @brief update Run the update loop of the controller. This copies the current states from the joint handles to the controller and sets the desired torque and damping from the controller.
          * @param timeInNanoseconds Monotonic clock time in nanoseconds
          * @param duration Duration of last cycle in nanoseconds (expected to be 1ms / 10^6 nanoseconds)
+         *
+         * @return false if the controller threw an exception
          */
-    virtual void update(long long timeInNanoseconds, long long duration) = 0;
+    virtual bool update(long long timeInNanoseconds, long long duration) = 0;
 
 
     /**
-     * @brief reset Reset the controller to the initial condition.
+     * @brief stop Stop the controller and reset to the initial condition.
      *
-     * TODO: Not implemented yet
+     * @return false if the controller was not able to stop cleanly
      */
-    virtual void reset() = 0;
+    virtual bool stop() = 0;
+
+
+    /**
+     * @brief getControllerDescription Get a JSON description of the current controller configuration
+     *
+     *
+     * Data format:
+     * {
+     *  "initialized": [true/false],
+     *  "joints": [],
+     *  "imus": [],
+     *  "forceTorqueSensors": []
+     * }
+     *
+     * @return json description of controller setup
+     */
+    virtual std::string getControllerDescription() = 0;
 
 
     /**

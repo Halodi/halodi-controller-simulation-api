@@ -2,6 +2,8 @@ package com.halodi.controllerAPI;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.halodi.controllerAPI.wholeRobot.EffortJointHandle;
 import com.halodi.controllerAPI.wholeRobot.EffortJointHandleImpl;
@@ -12,9 +14,11 @@ import com.halodi.controllerAPI.wholeRobot.IMUHandleImpl;
 
 public abstract class NativeHalodiControllerJavaBridge implements HalodiControllerJavaBridge, HalodiControllerElements
 {
-   private final HashMap<String, EffortJointHandle> joints = new HashMap<>();
-   private final HashMap<String, IMUHandle> imus = new HashMap<>();
-   private final HashMap<String, ForceTorqueSensorHandle> forceTorqueSensors = new HashMap<>();
+   private boolean initialized;
+   
+   private final HashMap<String, EffortJointHandleImpl> joints = new HashMap<>();
+   private final HashMap<String, IMUHandleImpl> imus = new HashMap<>();
+   private final HashMap<String, ForceTorqueSensorHandleImpl> forceTorqueSensors = new HashMap<>();
 
    /**
     * Create a new JointStateHandle. Called from native layer
@@ -22,8 +26,13 @@ public abstract class NativeHalodiControllerJavaBridge implements HalodiControll
     * @param jointName
     * @return
     */
-   ByteBuffer createEffortJointHandle(String jointName)
+   synchronized ByteBuffer createEffortJointHandle(String jointName)
    {
+      if(joints.containsKey(jointName))
+      {
+         return joints.get(jointName).getBuffer();
+      }
+      
       EffortJointHandleImpl jointHandle = new EffortJointHandleImpl(jointName);
       joints.put(jointName, jointHandle);
       return jointHandle.getBuffer();
@@ -35,12 +44,16 @@ public abstract class NativeHalodiControllerJavaBridge implements HalodiControll
     * @param imuName
     * @return
     */
-   ByteBuffer createIMUHandle(String parentLink, String imuName)
+   synchronized ByteBuffer createIMUHandle(String parentLink, String imuName)
    {
+      String name = HalodiControllerElements.createQualifiedName(parentLink, imuName);
+      if(imus.containsKey(name))
+      {
+         return imus.get(name).getBuffer();
+      }
+      
       IMUHandleImpl imuHandle = new IMUHandleImpl(parentLink, imuName);
-
-      imus.put(HalodiControllerElements.createQualifiedName(parentLink, imuName), imuHandle);
-
+      imus.put(name, imuHandle);
       return imuHandle.getBuffer();
    }
 
@@ -50,19 +63,33 @@ public abstract class NativeHalodiControllerJavaBridge implements HalodiControll
     * @param forceTorqueSensorName
     * @return
     */
-   ByteBuffer createForceTorqueSensorHandle(String parentLink, String forceTorqueSensorName)
+   synchronized ByteBuffer createForceTorqueSensorHandle(String parentLink, String forceTorqueSensorName)
    {
+      String name = HalodiControllerElements.createQualifiedName(parentLink, forceTorqueSensorName);
+      
+      if(forceTorqueSensors.containsKey(name))
+      {
+         return forceTorqueSensors.get(name).getBuffer();
+      }
+      
       ForceTorqueSensorHandleImpl forceTorqueSensorHandle = new ForceTorqueSensorHandleImpl(parentLink, forceTorqueSensorName);
-      forceTorqueSensors.put(HalodiControllerElements.createQualifiedName(parentLink, forceTorqueSensorName), forceTorqueSensorHandle);
+      forceTorqueSensors.put(name, forceTorqueSensorHandle);
       return forceTorqueSensorHandle.getBuffer();
    }
+   
 
-   boolean initFromNative()
+   synchronized boolean initFromNative(String arguments)
    {
+      if(initialized)
+      {
+         System.err.println("[NativeHalodiControllerJavaBridge] Controller already initialized. Cannot initialize twice.");
+         return false;
+      }
+      
       try
       {        
-         init();
-         
+         initialize(arguments);
+         initialized = true;
          
          return true;
       }
@@ -73,35 +100,69 @@ public abstract class NativeHalodiControllerJavaBridge implements HalodiControll
       }
 
    }
+   
+   
+   synchronized boolean startFromNative()
+   {
+      if(!initialized)
+      {
+         System.err.println("[NativeHalodiControllerJavaBridge] Controller not initialized. Cannot start controller.");
+         return false;
+      }
+      
+      try
+      {        
+         start();
+         
+         return true;
+      }
+      catch (Throwable t)
+      {
+         t.printStackTrace();
+         return false;
+      }
+      
+   }
 
-   void updateFromNative(long time, long duration)
+   boolean updateFromNative(long time, long duration)
    {
       try
       {
          doControl(time, duration);
+         return true;
       }
       catch (Throwable t)
       {
          t.printStackTrace();
+         return false;
       }
 
    }
 
-   void resetFromNative()
+   boolean stopFromNative()
    {
       try
       {
-         reset();
+         stop();
+         return true;
       }
       catch (Throwable t)
       {
          t.printStackTrace();
+         return false;
       }
    }
    
    void shutdownFromNative()
    {
-      stop();  
+      try
+      {
+         shutdown();
+      }
+      catch (Throwable t)
+      {
+         t.printStackTrace();
+      } 
    }
    
    double getInitialJointAngleFromNative(String name)
@@ -115,6 +176,47 @@ public abstract class NativeHalodiControllerJavaBridge implements HalodiControll
          t.printStackTrace();
          return 0.0;
       }
+   }
+   
+   
+   
+   private void addSetToJSON(StringBuilder json, String name, Set<String> elements)
+   {
+      json.append('"');
+      json.append(name);
+      json.append('"');
+      
+      json.append("[\"");
+      json.append(elements.stream().collect(Collectors.joining("\", \"")));
+      json.append("\"]");
+      
+   }
+   
+   
+   /**
+    * @return A JSON description of the controller data
+    */
+   String getControllerDescriptionFromNative()
+   {
+      StringBuilder json = new StringBuilder();
+      json.append("{");
+      
+      json.append("\"initialized\":\""); 
+      json.append(initialized); 
+      json.append("\""); 
+      
+      json.append(',');
+      
+      addSetToJSON(json, "joints", joints.keySet());
+      json.append(',');
+      addSetToJSON(json, "imus", imus.keySet());
+      json.append(',');
+      addSetToJSON(json, "forceTorqueSensors", forceTorqueSensors.keySet());
+      
+      
+      json.append("}");
+      
+      return json.toString();
    }
       
 

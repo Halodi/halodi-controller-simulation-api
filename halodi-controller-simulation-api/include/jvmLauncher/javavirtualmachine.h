@@ -21,9 +21,11 @@ public:
     void callVoidMethod(std::shared_ptr<JavaObject> obj, ...);
     void* callBytebufferMethod(std::shared_ptr<JavaObject> obj, int minimumCapacity, ...);
     jboolean callBooleanMethod(std::shared_ptr<JavaObject> obj, ...);
-    jboolean callDoubleMethod(std::shared_ptr<JavaObject> obj, ...);
+    jdouble callDoubleMethod(std::shared_ptr<JavaObject> obj, ...);
+    std::string callStringMethod(std::shared_ptr<JavaObject> obj...);
 
     std::shared_ptr<JavaObject> createObject(jargument_t arg, ...);
+
 
 private:
 

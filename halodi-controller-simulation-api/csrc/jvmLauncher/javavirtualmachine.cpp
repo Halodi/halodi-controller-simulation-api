@@ -393,6 +393,34 @@ void* JavaMethod::callBytebufferMethod(std::shared_ptr<JavaObject> obj, int mini
     }
 }
 
+std::string JavaMethod::callStringMethod(std::shared_ptr<JavaObject> obj, ...)
+{
+    JNIEnv* env = launcher->getEnv();
+
+    if(env->IsInstanceOf(obj->native(), clazz))
+    {
+        va_list arglist;
+        va_start(arglist, obj);
+        jstring javaString = (jstring) env->CallObjectMethodV(obj->native(), methodID, arglist);
+        va_end(arglist);
+
+        if(!javaString)
+        {
+            throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": String is null");
+        }
+
+        const char* cstr = env->GetStringUTFChars(javaString, 0);
+        std::string cppStr = std::string(cstr);
+        env->ReleaseStringUTFChars(javaString, cstr);
+
+        return cppStr;
+    }
+    else
+    {
+        throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": Unexpected object type");
+    }
+}
+
 jboolean JavaMethod::callBooleanMethod(std::shared_ptr<JavaObject> obj, ...)
 {
     JNIEnv* env = launcher->getEnv();
@@ -413,11 +441,11 @@ jboolean JavaMethod::callBooleanMethod(std::shared_ptr<JavaObject> obj, ...)
     return returnValue;
 }
 
-jboolean JavaMethod::callDoubleMethod(std::shared_ptr<JavaObject> obj, ...)
+jdouble JavaMethod::callDoubleMethod(std::shared_ptr<JavaObject> obj, ...)
 {
     JNIEnv* env = launcher->getEnv();
 
-    bool returnValue = false;
+    jdouble returnValue = 0.0;
     if(env->IsInstanceOf(obj->native(), clazz))
     {
         va_list arglist;

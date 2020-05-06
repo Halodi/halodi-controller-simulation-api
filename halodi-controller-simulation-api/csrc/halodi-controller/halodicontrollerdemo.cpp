@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
 {
     ControllerConfiguration config;
 
-    config.mainClass = "com.halodi.controllerAPI.HalodiControllerJavaBridge";
+    config.mainClass = "com.halodi.controllerAPI.demo.HalodiControllerDemo";
     config.classPath = "/home/jesper/git/halodi/ros2_ws/src/halodi-controller-simulation-api/halodi-controller-simulation-api/bin/main";
 
 
@@ -19,8 +19,11 @@ int main(int argc, char *argv[])
     std::shared_ptr<IMUHandle> imu = controller->addIMU("pelvis", "imu");
     std::shared_ptr<ForceTorqueSensorHandle> forceTorqueSensor = controller->addForceTorqueSensor("foot", "sensor");
 
+    controller->initialize("--help");
 
-    controller->initialize();
+    std::cout << "Initialization: " << controller->getControllerDescription() << std::endl;
+
+    controller->start();
 
 
     for(unsigned int i = 0; i < 10; ++i)
@@ -35,6 +38,6 @@ int main(int argc, char *argv[])
         std::cout << "Torques: " << joint1->getDesiredEffort() << " " << joint2->getDesiredEffort() << std::endl;
     }
 
-    controller->reset();
+    controller->stop();
 
 }
