@@ -27,5 +27,10 @@ namespace halodi_controller
         data[5] = tz;
     }
 
+    double *NativeForceTorqueSensorHandleHolder::c_data()
+    {
+        return data;
+    }
+
 
 }

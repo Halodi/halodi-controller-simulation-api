@@ -191,7 +191,7 @@ public:
 
 
     /**
-     * @brief getControllerDescription Get a JSON description of the current controller configuration
+     * @brief getControllerDescription Get a JSON description of the current controller setup
      *
      *
      * Data format:
@@ -205,6 +205,22 @@ public:
      * @return json description of controller setup
      */
     virtual std::string getControllerDescription() = 0;
+
+
+    /**
+     * @brief getControllerConfiguration Get a JSON description of the controller configuration
+     *
+     * Data format:
+     * {
+     *      "workingDirectory": "",
+     *      "mainClass": "",
+     *      "classPath": "",
+     *      "vmOptions": ""
+     * }
+     *
+     * @return json description matching the ControllerConfiguration passed into Create()
+     */
+    virtual std::string getControllerConfiguration() = 0;
 
 
     /**

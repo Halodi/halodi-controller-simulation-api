@@ -24,6 +24,7 @@ namespace halodi_controller
         void setLinearAcceleration(double xdd, double ydd, double zdd);
         void setAngularVelocity(double wx, double wy, double wz);
 
+        double* c_data();
 
     private:
 

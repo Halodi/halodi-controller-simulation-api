@@ -35,4 +35,9 @@ namespace halodi_controller
         data[8] = wy;
         data[9] = wz;
     }
+
+    double *NativeIMUHandleHolder::c_data()
+    {
+        return data;
+    }
 }

@@ -21,6 +21,7 @@ namespace halodi_controller
         void setForce(double fx, double fy, double fz);
         void setTorque(double tx, double ty, double tz);
 
+        double* c_data();
 
     private:
         double* data;

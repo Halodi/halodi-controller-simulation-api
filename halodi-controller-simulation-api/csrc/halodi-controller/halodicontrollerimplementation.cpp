@@ -10,7 +10,8 @@
 namespace  halodi_controller
 {
 
-HalodiControllerImplementation::HalodiControllerImplementation(ControllerConfiguration &configuration)
+HalodiControllerImplementation::HalodiControllerImplementation(ControllerConfiguration &configuration) :
+    vmConfig(configuration)
 
 {
     if(configuration.mainClass.empty())
@@ -102,6 +103,20 @@ bool HalodiControllerImplementation::stop()
 std::string HalodiControllerImplementation::getControllerDescription()
 {
     return jGetControllerDescription->callStringMethod(bridge);
+}
+
+std::string HalodiControllerImplementation::getControllerConfiguration()
+{
+    std::string json = "{";
+
+    json += "\"workingDirectory\":\"" + vmConfig.workingDirectory + "\",";
+    json += "\"classPath\":\"" + vmConfig.classPath + "\",";
+    json += "\"mainClass\":\"" + vmConfig.mainClass + "\",";
+    json += "\"vmOptions\":\"" + vmConfig.vmOptions;
+
+    json += "}";
+    return json;
+
 }
 
 void HalodiControllerImplementation::attachCurrentThread()

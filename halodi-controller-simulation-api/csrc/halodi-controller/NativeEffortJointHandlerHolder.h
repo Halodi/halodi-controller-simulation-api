@@ -27,6 +27,8 @@ namespace halodi_controller
 
        double getInitialAngle();
 
+       double* c_data();
+
     private:
 
         double* data;

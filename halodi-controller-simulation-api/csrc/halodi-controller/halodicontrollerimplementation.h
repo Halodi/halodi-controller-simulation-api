@@ -24,6 +24,8 @@ public:
     bool stop();
 
     std::string getControllerDescription();
+    std::string getControllerConfiguration();
+
 
     void attachCurrentThread();
     void deattachCurrentThread();
@@ -32,6 +34,8 @@ public:
     virtual ~HalodiControllerImplementation();
 
 private:
+    ControllerConfiguration vmConfig;
+
     std::shared_ptr<JavaVirtualMachine> vm;
 
     std::shared_ptr<JavaObject> bridge;

@@ -46,6 +46,11 @@ namespace halodi_controller
         return initialAngle;
     }
 
+    double *NativeEffortJointHandleHolder::c_data()
+    {
+        return data;
+    }
+
 
 
 }
