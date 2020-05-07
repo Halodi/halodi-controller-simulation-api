@@ -25,7 +25,18 @@ public class HalodiControllerPluginConfigurationCreator
 
       for (URL url : urls)
       {
-         config.classPath.add(url.getFile());
+         String file = url.getFile();
+         
+         if(ignore(file))
+         {
+            System.out.println("Ignoring classpath entry " + file);
+         }
+         else
+         {
+            config.classPath.add(url.getFile());
+         }
+         
+         
       }
 
       config.javaHome = System.getProperty("java.home");
@@ -38,6 +49,21 @@ public class HalodiControllerPluginConfigurationCreator
       config.mainClass = pluginClass.getCanonicalName();
 
       return config;
+   }
+
+   private static boolean ignore(String file)
+   {
+      if(file.contains("org.glassfish.jaxb") && file.contains("jaxb-runtime"))
+      {
+         return true;
+      }
+      
+      if(file.contains("jakarta.xml.bind-api"))
+      {
+         return true;
+      }
+      
+      return false;
    }
 
    public static void main(String[] args)
