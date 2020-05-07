@@ -34,7 +34,8 @@ public abstract class NativeHalodiControllerJavaBridge implements HalodiControll
          return joints.get(jointName).getBuffer();
       }
       
-      EffortJointHandleImpl jointHandle = new EffortJointHandleImpl(jointName);
+      EffortJointHandleImpl jointHandle = new EffortJointHandleImpl(jointName, getInitialJointAngle(jointName));
+      
       joints.put(jointName, jointHandle);
       return jointHandle.getBuffer();
    }
@@ -165,19 +166,6 @@ public abstract class NativeHalodiControllerJavaBridge implements HalodiControll
       {
          t.printStackTrace();
       } 
-   }
-   
-   double getInitialJointAngleFromNative(String name)
-   {
-      try
-      {
-         return getInitialJointAngle(name);
-      }
-      catch (Throwable t)
-      {
-         t.printStackTrace();
-         return 0.0;
-      }
    }
    
    

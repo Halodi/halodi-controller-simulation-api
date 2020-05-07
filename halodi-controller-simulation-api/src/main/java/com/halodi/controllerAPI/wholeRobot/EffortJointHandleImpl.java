@@ -11,13 +11,16 @@ public class EffortJointHandleImpl implements EffortJointHandle
    private final ByteBuffer buffer;
    private final DoubleBuffer doubleBuffer;
 
-   public EffortJointHandleImpl(String jointName)
+   public EffortJointHandleImpl(String jointName, double initialAngle)
    {
       this.jointName = jointName;
-      this.buffer = ByteBuffer.allocateDirect(5 * 8);
+      this.buffer = ByteBuffer.allocateDirect(6 * 8);
       this.buffer.order(ByteOrder.nativeOrder());
 
       this.doubleBuffer = this.buffer.asDoubleBuffer();
+      
+      doubleBuffer.put(5, initialAngle);
+
    }
 
    @Override
@@ -54,9 +57,12 @@ public class EffortJointHandleImpl implements EffortJointHandle
    {
       doubleBuffer.put(4, dampingScale);
    }
-
+  
+   
    public ByteBuffer getBuffer()
    {
       return buffer;
    }
+
+   
 }

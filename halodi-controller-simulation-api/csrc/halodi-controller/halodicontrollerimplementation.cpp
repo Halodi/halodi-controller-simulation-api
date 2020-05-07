@@ -40,7 +40,6 @@ HalodiControllerImplementation::HalodiControllerImplementation(ControllerConfigu
 
     std::string mainClass = configuration.mainClass;
     jAddJoint = vm->getJavaMethod(mainClass, "createEffortJointHandle", "(Ljava/lang/String;)Ljava/nio/ByteBuffer;");
-    jGetInitialAngle = vm->getJavaMethod(mainClass, "getInitialJointAngleFromNative", "(Ljava/lang/String;)D");
     jAddIMU = vm->getJavaMethod(mainClass, "createIMUHandle", "(Ljava/lang/String;Ljava/lang/String;)Ljava/nio/ByteBuffer;");
     jAddForceTorqueSensor = vm->getJavaMethod(mainClass, "createForceTorqueSensorHandle", "(Ljava/lang/String;Ljava/lang/String;)Ljava/nio/ByteBuffer;");
     jInitialize = vm->getJavaMethod(mainClass, "initFromNative", "(Ljava/lang/String;)Z");
@@ -56,8 +55,7 @@ std::shared_ptr<JointHandle> HalodiControllerImplementation::addJoint(std::strin
     std::shared_ptr<JavaString> jName = vm->createJavaString(name);
     double* buffer = (double*) jAddJoint->callBytebufferMethod(bridge, NativeEffortJointHandleHolder::size * sizeof(double), jName->native());
 
-    double initialAngle = jGetInitialAngle->callDoubleMethod(bridge, jName->native());
-    return std::make_shared<NativeEffortJointHandleHolder>(buffer, initialAngle);
+    return std::make_shared<NativeEffortJointHandleHolder>(buffer);
 }
 
 std::shared_ptr<IMUHandle> HalodiControllerImplementation::addIMU(std::string parentLink, std::string name)

@@ -41,7 +41,6 @@ private:
     std::shared_ptr<JavaObject> bridge;
 
     std::shared_ptr<JavaMethod> jAddJoint;
-    std::shared_ptr<JavaMethod> jGetInitialAngle;
     std::shared_ptr<JavaMethod> jAddIMU;
     std::shared_ptr<JavaMethod> jAddForceTorqueSensor;
     std::shared_ptr<JavaMethod> jInitialize;

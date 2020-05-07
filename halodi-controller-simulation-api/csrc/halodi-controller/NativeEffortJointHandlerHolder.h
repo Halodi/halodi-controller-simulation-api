@@ -7,9 +7,9 @@ namespace halodi_controller
     class NativeEffortJointHandleHolder : public JointHandle
     {
     public:
-        static const unsigned int size = 5;
+        static const unsigned int size = 6;
 
-        NativeEffortJointHandleHolder(double* data_, double initialAngle_);
+        NativeEffortJointHandleHolder(double* data_);
 
         virtual ~NativeEffortJointHandleHolder();
 
