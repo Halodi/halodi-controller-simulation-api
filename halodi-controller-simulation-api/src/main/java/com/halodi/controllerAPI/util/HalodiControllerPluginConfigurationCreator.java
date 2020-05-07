@@ -15,6 +15,7 @@ public class HalodiControllerPluginConfigurationCreator
    public static HalodiControllerPluginConfiguration create(Class<? extends NativeHalodiControllerJavaBridge> pluginClass)
    {
       HalodiControllerPluginConfiguration config = new HalodiControllerPluginConfiguration();
+      config.name = pluginClass.getSimpleName();
       config.classPath = new ArrayList<String>();
       config.vmArgs = new ArrayList<>();
 
