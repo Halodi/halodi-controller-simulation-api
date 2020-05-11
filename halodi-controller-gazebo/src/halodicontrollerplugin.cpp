@@ -135,6 +135,7 @@ public:
 
             config.mainClass = "com.halodi.eve.simulation.NativePluginEveSimulation";
 
+            std::string controllerArguments = "--pubsub FAST_RTPS_SYSTEM_LIBRARY --variableserver";
 
 
             if(const char* halodi_classpath = std::getenv("HALODI_CONTROLLER_CLASSPATH"))
@@ -174,11 +175,20 @@ public:
             }
 
 
-            if(controller->initialize())
+            if(controller->initialize(controllerArguments))
             {
-                firstTick = true;
-                this->updateConnection = event::Events::ConnectWorldUpdateBegin(
-                            std::bind(&HalodiControllerPlugin::OnUpdate, this));
+                if(controller->start())
+                {
+
+                    firstTick = true;
+                    this->updateConnection = event::Events::ConnectWorldUpdateBegin(
+                                std::bind(&HalodiControllerPlugin::OnUpdate, this));
+                }
+                else
+                {
+                    controller.reset();
+                    std::cerr << "Cannot start controller." << std::endl;
+                }
 
             }
             else
@@ -236,8 +246,12 @@ public:
 
     virtual ~HalodiControllerPlugin()
     {
-        // Stop generating update() calls
-        updateConnection.reset();
+        if(updateConnection)
+        {
+            controller->stop();
+            // Stop generating update() calls
+            updateConnection.reset();
+        }
 
     }
 
