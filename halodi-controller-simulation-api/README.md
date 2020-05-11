@@ -65,3 +65,31 @@ If setup in a ROS2 workspace, the halodi-controller package contains a fully fun
 # Examples
 
 - [Gazebo plugin](../halodi-controller-gazebo)
+
+
+# Building
+
+## Windows
+
+
+Note: Due to path length limitations, the commpilation can fail. If you did not setup long paths on windows, it is recommended to checkout in C:\ws and compile from there.
+
+##### Requirements:
+
+- CMake [https://cmake.org/download/](https://cmake.org/download/). Recommended edition: Windows win64-x64 installer. Make sure to add to your path.
+- Visual Studio 2019 Community [https://www.visualstudio.com/downloads/](https://www.visualstudio.com/downloads/).
+        - Make sure to select "Desktop Development with C++" and select "C++ MFC for latest v142 build tools" under Optional.
+        - Restart after installation and start visual studio (!)
+##### Configuration and compilation:
+
+Use CMake GUI to create the Visual Studio makefiles.
+- Start the x64 Native Tools Command Prompt for VS 2019
+
+```
+cd [Source directory]\halodi-controller-simulation-api\halodi-controller-simulation-api
+md buildc
+cd buildc
+"C:\Program Files\CMake\bin\cmake.exe" -G "Visual Studio 16 2019" -A x64 ..
+"C:\Program Files\CMake\bin\cmake.exe" --build . --config Release
+```
+
