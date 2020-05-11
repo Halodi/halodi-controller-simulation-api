@@ -19,7 +19,7 @@ public class HalodiControllerPluginConfigurationCreator
       config.classPath = new ArrayList<String>();
       config.vmArgs = new ArrayList<>();
 
-      ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
+      ClassLoader systemClassLoader = Thread.currentThread().getContextClassLoader();
 
       URL[] urls = ((URLClassLoader) systemClassLoader).getURLs();
 
