@@ -94,8 +94,8 @@ private:
     static const char classpathSeperator = ':';
 #endif
 
-    JavaVirtualMachine(std::string workingDirectory, std::string classpath, std::string vmArguments);
-    std::string expandClasspath(std::string classpath);
+    JavaVirtualMachine(std::string javaHome, std::string workingDirectory, std::vector<std::string> classpath, std::vector<std::string> vmArguments);
+    std::string expandClasspath(std::vector<std::string> classpath);
 
 
     JavaVM *jvm;
@@ -106,7 +106,7 @@ private:
 
 public:
 
-    static std::shared_ptr<JavaVirtualMachine> startVM(std::string workingDirectory, std::string classpath, std::string vmArguments);
+    static std::shared_ptr<JavaVirtualMachine> startVM(std::string javaHome, std::string workingDirectory, std::vector<std::string> classpath, std::vector<std::string> vmArguments);
 
 
     std::shared_ptr<JavaMethod> getJavaMethod(std::string className, std::string method, std::string signature);

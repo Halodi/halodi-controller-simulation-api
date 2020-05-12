@@ -6,13 +6,7 @@ using namespace halodi_controller;
 
 int main(int argc, char *argv[])
 {
-    ControllerConfiguration config;
-
-    config.mainClass = "com.halodi.controllerAPI.demo.HalodiControllerDemo";
-    config.classPath = "/home/jesper/git/halodi/ros2_ws/src/halodi-controller-simulation-api/halodi-controller-simulation-api/bin/main";
-
-
-    std::shared_ptr<HalodiController> controller = HalodiController::create(config);
+    std::shared_ptr<HalodiController> controller = HalodiController::create("HalodiControllerDemo");
 
     std::shared_ptr<JointHandle> joint1 = controller->addJoint("joint1");
     std::shared_ptr<JointHandle> joint2 = controller->addJoint("joint2");

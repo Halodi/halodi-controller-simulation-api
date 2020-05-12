@@ -131,25 +131,8 @@ public:
         try
         {
 
-            ControllerConfiguration config;
-
-            config.mainClass = "com.halodi.eve.simulation.NativePluginEveSimulation";
-
             std::string controllerArguments = "--pubsub FAST_RTPS_SYSTEM_LIBRARY --variableserver";
-
-
-            if(const char* halodi_classpath = std::getenv("HALODI_CONTROLLER_CLASSPATH"))
-            {
-                std::cout << "Loading controller from classpath: " << halodi_classpath << std::endl;
-                config.classPath = std::string(halodi_classpath);
-            }
-            else
-            {
-                throw std::runtime_error("Environment variable HALODI_CONTROLLER_CLASSPATH not set. Cannot start controller.");
-            }
-
-
-            controller = HalodiController::create(config);
+            controller = HalodiController::create("NativePluginEveSimulation");
 
 
             for(auto &joint : this->model->GetJoints())

@@ -10,35 +10,18 @@
 namespace  halodi_controller
 {
 
-HalodiControllerImplementation::HalodiControllerImplementation(ControllerConfiguration &configuration) :
-    vmConfig(configuration)
-
+HalodiControllerImplementation::HalodiControllerImplementation(std::string controllerName_, std::string working_directory_) :
+    configurationLoader(controllerName_)
 {
-    if(configuration.mainClass.empty())
-    {
-        throw std::runtime_error("Main class not set.");
-    }
 
-    if(configuration.classPath.empty())
-    {
-        throw std::runtime_error("Classpath not set.");
-    }
-
-    if(configuration.workingDirectory.empty())
-    {
-        throw std::runtime_error("Working directory not set.");
-    }
+    vm = JavaVirtualMachine::startVM(configurationLoader.javaHome, working_directory_, configurationLoader.classPath, configurationLoader.vmArgs);
 
 
-
-    vm = JavaVirtualMachine::startVM(configuration.workingDirectory, configuration.classPath, configuration.vmOptions);
-
-
-    std::shared_ptr<JavaMethod> ctor = vm->getJavaMethod(configuration.mainClass, "<init>", "()V");
+    std::string mainClass = configurationLoader.mainClass;
+    std::shared_ptr<JavaMethod> ctor = vm->getJavaMethod(mainClass, "<init>", "()V");
     bridge = ctor->createObject(jargument);
 
 
-    std::string mainClass = configuration.mainClass;
     jAddJoint = vm->getJavaMethod(mainClass, "createEffortJointHandle", "(Ljava/lang/String;)Ljava/nio/ByteBuffer;");
     jAddIMU = vm->getJavaMethod(mainClass, "createIMUHandle", "(Ljava/lang/String;Ljava/lang/String;)Ljava/nio/ByteBuffer;");
     jAddForceTorqueSensor = vm->getJavaMethod(mainClass, "createForceTorqueSensorHandle", "(Ljava/lang/String;Ljava/lang/String;)Ljava/nio/ByteBuffer;");
@@ -107,10 +90,10 @@ std::string HalodiControllerImplementation::getControllerConfiguration()
 {
     std::string json = "{";
 
-    json += "\"workingDirectory\":\"" + vmConfig.workingDirectory + "\",";
-    json += "\"classPath\":\"" + vmConfig.classPath + "\",";
-    json += "\"mainClass\":\"" + vmConfig.mainClass + "\",";
-    json += "\"vmOptions\":\"" + vmConfig.vmOptions + "\"";
+//    json += "\"workingDirectory\":\"" + vmConfig.workingDirectory + "\",";
+//    json += "\"classPath\":\"" + vmConfig.classPath + "\",";
+//    json += "\"mainClass\":\"" + vmConfig.mainClass + "\",";
+//    json += "\"vmOptions\":\"" + vmConfig.vmOptions + "\"";
 
     json += "}";
     return json;

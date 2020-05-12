@@ -5,13 +5,15 @@
 #include <vector>
 #include "halodi-controller/halodicontroller.h"
 #include "jvmLauncher/javavirtualmachine.h"
+#include "halodicontrollerconfigurationloader.h"
+
 
 namespace  halodi_controller {
 
 class HalodiControllerImplementation : public HalodiController
 {
 public:
-    HalodiControllerImplementation(ControllerConfiguration &configuration);
+    HalodiControllerImplementation(std::string controllerName_, std::string working_directory_);
 
     std::shared_ptr<JointHandle> addJoint(std::string name);
     std::shared_ptr<IMUHandle> addIMU(std::string parentLink, std::string name);
@@ -34,7 +36,7 @@ public:
     virtual ~HalodiControllerImplementation();
 
 private:
-    ControllerConfiguration vmConfig;
+    HalodiControllerConfigurationLoader configurationLoader;
 
     std::shared_ptr<JavaVirtualMachine> vm;
 

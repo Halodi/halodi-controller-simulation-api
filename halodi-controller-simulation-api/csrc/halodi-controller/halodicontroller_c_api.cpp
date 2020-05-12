@@ -25,7 +25,7 @@ char* to_c_str(std::string str)
 
 
 
-bool halodi_controller_create(char *workingDirectory, char *classPath, char *mainClass, char *vmOptions)
+bool halodi_controller_create(char* controllerName_, char *workingDirectory_)
 {
      freopen("stdout.txt", "a", stdout);
      freopen("stderr.txt", "a", stderr);
@@ -38,25 +38,26 @@ bool halodi_controller_create(char *workingDirectory, char *classPath, char *mai
 
     try
     {
-        ControllerConfiguration config;
-        if(workingDirectory != nullptr)
+
+        std::string workingDirectory;
+        if(workingDirectory_ != nullptr)
         {
-            config.workingDirectory = std::string(workingDirectory);
+            workingDirectory = std::string(workingDirectory_);
         }
-        if(classPath != nullptr)
+        else
         {
-            config.classPath = std::string(classPath);
-        }
-        if(mainClass != nullptr)
-        {
-            config.mainClass = std::string(mainClass);
-        }
-        if(vmOptions != nullptr)
-        {
-            config.vmOptions = std::string(vmOptions);
+            workingDirectory = ".";
         }
 
-        controller = HalodiController::create(config);
+        if(controllerName_ == nullptr)
+        {
+            std::cout << "Controller name not set." << std::endl;
+            return false;
+        }
+
+        std::string controllerName = std::string(controllerName_);
+
+        controller = HalodiController::create(controllerName, workingDirectory);
 
         return true;
     }

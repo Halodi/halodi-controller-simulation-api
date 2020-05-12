@@ -17,14 +17,10 @@ from scripts import GazeboRosPaths
 def generate_launch_description():
     gazebo_package_prefix = get_package_share_directory('gazebo_ros')
     package_prefix = get_package_share_directory('halodi-controller-gazebo')
-    halodi_controller_prefix = get_package_share_directory('halodi-controller')
         
     model, plugin, media = GazeboRosPaths.get_paths()
-    
-    halodi_controller_classpath = os.path.join(halodi_controller_prefix, "*.jar")
-    
-    os.environ["HALODI_CONTROLLER_CLASSPATH"] = halodi_controller_classpath;
-    
+
+
     return LaunchDescription([
         
         DeclareLaunchArgument(

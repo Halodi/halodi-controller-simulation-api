@@ -13,6 +13,7 @@
 
 #include <glob.h>
 
+#include "../platform/platform.h"
 
 void JavaVirtualMachine::displayJNIError(std::string prefix, int error)
 {
@@ -67,19 +68,14 @@ void JavaVirtualMachine::detachCurrentThread()
 }
 
 
-std::string JavaVirtualMachine::expandClasspath(std::string classpath)
+std::string JavaVirtualMachine::expandClasspath(std::vector<std::string> classpathElementsIn)
 {
 
 
-
-
-    std::istringstream classpathTokens(classpath);
     std::vector<std::string> classpathElements;
 
-    while(!classpathTokens.eof())
+    for(std::string& classpathElement : classpathElementsIn)
     {
-        std::string classpathElement;
-        std::getline(classpathTokens, classpathElement, classpathSeperator);
 
         if(!classpathElement.empty())
         {
@@ -118,23 +114,12 @@ std::string JavaVirtualMachine::expandClasspath(std::string classpath)
 }
 
 
-JavaVirtualMachine::JavaVirtualMachine(std::string workingDirectory, std::string classpath, std::string vmOptions)
+JavaVirtualMachine::JavaVirtualMachine(std::string javaHome, std::string workingDirectory, std::vector<std::string> classpath, std::vector<std::string> vmOptions)
 {
     vmArguments.version = JNI_VERSION_1_8;
 
-    std::istringstream vmOptionsTokens(vmOptions);
-
     std::vector<std::string> options;
-    while(!vmOptionsTokens.eof())
-    {
-        std::string option;
-        std::getline(vmOptionsTokens, option, ' ');
-
-        if(!option.empty())
-        {
-            options.push_back(option);
-        }
-    }
+    options.insert(options.end(), vmOptions.begin(), vmOptions.end());
 
     // Set classpath
     options.push_back("-Djava.class.path=" + expandClasspath(classpath));
@@ -143,14 +128,28 @@ JavaVirtualMachine::JavaVirtualMachine(std::string workingDirectory, std::string
     options.push_back("-Xrs");
 
 
-    JavaVMOption* javaOptions = new JavaVMOption[options.size()];
-    for(uint i = 0; i < options.size(); i++)
-    {
-        javaOptions[i].optionString = new char[options.at(i).length() + 1];
-        std::strcpy (javaOptions[i].optionString, options.at(i).c_str());
+
+
+
+   halodi_platform::CreateJavaVM createJavaVM = nullptr;
+
+    if (!halodi_platform::loadJNIFunctions(javaHome, &createJavaVM)) {
+        throw std::runtime_error("Error: failed to load VM runtime library!");
     }
 
-    vmArguments.nOptions = (jint) options.size();
+    JavaVMOption* javaOptions = new JavaVMOption[options.size()];
+
+    int argc = 0;
+    for(uint i = 0; i < options.size(); i++)
+    {
+        if(options.at(i) != "-")
+        {
+            javaOptions[argc].optionString = new char[options.at(i).length() + 1];
+            std::strcpy (javaOptions[argc].optionString, options.at(i).c_str());
+            ++argc;
+        }
+    }
+    vmArguments.nOptions = (jint) argc;
     vmArguments.options = javaOptions;
     vmArguments.ignoreUnrecognized = JNI_FALSE;
 
@@ -160,7 +159,7 @@ JavaVirtualMachine::JavaVirtualMachine(std::string workingDirectory, std::string
     DIR* currentDirectory = opendir(".");
     if(workingDirectory != "." && workingDirectory != "")
     {
-        if(chdir(workingDirectory.c_str()) == -1)
+        if(!chdir(workingDirectory.c_str()))
         {
             closedir(currentDirectory);
             jvm = nullptr;
@@ -174,8 +173,11 @@ JavaVirtualMachine::JavaVirtualMachine(std::string workingDirectory, std::string
     if(getcwd(temp, PATH_MAX) == 0); // Ignore return type
     std::cout << "Starting Java VM from path  " << temp << std::endl;
 
+
+
+
     JNIEnv* env;
-    jint res = JNI_CreateJavaVM(&jvm, (void**) &env, &vmArguments);
+    jint res = createJavaVM(&jvm, (void**) &env, &vmArguments);
     displayJNIError("Started Java VM", res);
 
     if(workingDirectory != ".")
@@ -214,9 +216,10 @@ jclass JavaVirtualMachine::getClass(std::string className)
     return cls;
 }
 
-std::shared_ptr<JavaVirtualMachine> JavaVirtualMachine::startVM(std::string workingDirectory, std::string classpath, std::string vmArguments)
+
+std::shared_ptr<JavaVirtualMachine> JavaVirtualMachine::startVM(std::string javaHome, std::string workingDirectory, std::vector<std::string> classpath, std::vector<std::string> vmArguments)
 {
-    JavaVirtualMachine* vm = new JavaVirtualMachine(workingDirectory, classpath, vmArguments);
+    JavaVirtualMachine* vm = new JavaVirtualMachine(javaHome, workingDirectory, classpath, vmArguments);
     return std::shared_ptr<JavaVirtualMachine>(vm);
 }
 
