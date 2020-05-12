@@ -23,13 +23,17 @@ char* to_c_str(std::string str)
 }
 
 
+void halodi_controller_redirect_output(char *stdoutFilename, char *stderrFilename)
+{
+
+    if(freopen(stdoutFilename, "a", stdout) == 0);
+    if(freopen(stderrFilename, "a", stderr) == 0);
+
+}
 
 
 bool halodi_controller_create(char* controllerName_, char *workingDirectory_)
 {
-     freopen("stdout.txt", "a", stdout);
-     freopen("stderr.txt", "a", stderr);
-
 
     if(controller)
     {
@@ -163,3 +167,4 @@ void halodi_controller_free_string(char *str)
 {
     delete str;
 }
+
