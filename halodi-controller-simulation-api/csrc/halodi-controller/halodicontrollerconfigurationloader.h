@@ -21,6 +21,9 @@ public:
     std::string mainClass;
     std::vector<std::string> vmArgs;
 
+
+    std::string jsonConfiguration;
+
 private:
 
 

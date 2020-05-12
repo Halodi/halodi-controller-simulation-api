@@ -88,16 +88,7 @@ std::string HalodiControllerImplementation::getControllerDescription()
 
 std::string HalodiControllerImplementation::getControllerConfiguration()
 {
-    std::string json = "{";
-
-//    json += "\"workingDirectory\":\"" + vmConfig.workingDirectory + "\",";
-//    json += "\"classPath\":\"" + vmConfig.classPath + "\",";
-//    json += "\"mainClass\":\"" + vmConfig.mainClass + "\",";
-//    json += "\"vmOptions\":\"" + vmConfig.vmOptions + "\"";
-
-    json += "}";
-    return json;
-
+    return configurationLoader.jsonConfiguration;
 }
 
 void HalodiControllerImplementation::attachCurrentThread()

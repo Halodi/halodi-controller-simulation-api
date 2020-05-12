@@ -56,6 +56,8 @@ HalodiControllerConfigurationLoader::HalodiControllerConfigurationLoader(std::st
                 vmArgs.push_back(vmArg);
             }
 
+            jsonConfiguration = plugin.dump(4);
+
             found = true;
 
             break;

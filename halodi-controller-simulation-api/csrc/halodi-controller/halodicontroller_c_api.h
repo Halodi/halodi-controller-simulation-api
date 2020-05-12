@@ -11,7 +11,7 @@ extern "C"
 {
     DLL_EXPORT void halodi_controller_redirect_output(char* stdoutFilename, char* stderrFilename);
 
-    DLL_EXPORT bool halodi_controller_create(char* workingDirectory, char* classPath, char* mainClass, char* vmOptions);
+    DLL_EXPORT bool halodi_controller_create(char* controllerName_, char *workingDirectory_);
 
     DLL_EXPORT bool halodi_controller_created();
 
