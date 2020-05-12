@@ -159,7 +159,7 @@ JavaVirtualMachine::JavaVirtualMachine(std::string javaHome, std::string working
     DIR* currentDirectory = opendir(".");
     if(workingDirectory != "." && workingDirectory != "")
     {
-        if(!chdir(workingDirectory.c_str()))
+        if(chdir(workingDirectory.c_str()) < 0)
         {
             closedir(currentDirectory);
             jvm = nullptr;
