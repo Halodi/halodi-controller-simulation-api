@@ -163,9 +163,11 @@ public:
                 if(controller->start())
                 {
 
-                    firstTick = true;
+                    reattachController = true;
                     this->updateConnection = event::Events::ConnectWorldUpdateBegin(
                                 std::bind(&HalodiControllerPlugin::OnUpdate, this));
+                    this->pauseConnection = event::Events::ConnectPause(
+                                std::bind(&HalodiControllerPlugin::OnPause, this));
                 }
                 else
                 {
@@ -187,13 +189,23 @@ public:
 
     }
 
+    void OnPause()
+    {
+        controller->attachCurrentThread();
+        controller->callController("setPaused", "true");
+        controller->deattachCurrentThread();
+
+        reattachController = true;
+    }
+
     void OnUpdate()
     {
-        if(firstTick)
+        if(reattachController)
         {
             // Make sure this thread is attached to the controller
             controller->attachCurrentThread();
-            firstTick = false;
+            controller->callController("setPaused", "false");
+            reattachController = false;
         }
 
 
@@ -224,18 +236,26 @@ public:
 
     void Reset()
     {
-        firstTick = true;
+        reattachController = true;
     }
 
     virtual ~HalodiControllerPlugin()
     {
-        if(updateConnection)
+        controller->attachCurrentThread();
+        if(pauseConnection)
         {
-            controller->stop();
-            // Stop generating update() calls
-            updateConnection.reset();
+            pauseConnection.reset();
         }
 
+        if(updateConnection)
+        {
+            // Stop generating update() calls
+            updateConnection.reset();
+
+            controller->stop();
+        }
+
+        controller->deattachCurrentThread();
     }
 
 
@@ -306,13 +326,14 @@ private:
 
     // Pointer to the update event connection
     event::ConnectionPtr updateConnection;
+    event::ConnectionPtr pauseConnection;
 
     std::vector<std::shared_ptr<GazeboHandle>> updateables;
 
 
     long long lastUpdateTime = 0;
 
-    bool firstTick = true;
+    bool reattachController = true;
 
 };
 
