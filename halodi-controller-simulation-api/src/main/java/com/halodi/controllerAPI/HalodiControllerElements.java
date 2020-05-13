@@ -3,7 +3,6 @@ package com.halodi.controllerAPI;
 import com.halodi.controllerAPI.wholeRobot.EffortJointHandle;
 import com.halodi.controllerAPI.wholeRobot.ForceTorqueSensorHandle;
 import com.halodi.controllerAPI.wholeRobot.IMUHandle;
-import com.halodi.controllerAPI.wholeRobot.SharedBuffer;
 
 public interface HalodiControllerElements
 {
@@ -28,7 +27,4 @@ public interface HalodiControllerElements
    
    ForceTorqueSensorHandle getForceTorqueSensor(String qualifiedName);
    
-   
-   SharedBuffer getSharedBuffer(String name);
-
 }

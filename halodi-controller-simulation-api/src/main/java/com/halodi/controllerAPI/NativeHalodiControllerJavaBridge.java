@@ -288,7 +288,6 @@ public abstract class NativeHalodiControllerJavaBridge implements HalodiControll
       return forceTorqueSensors.get(qualifiedName);
    }
  
-   @Override
    public SharedBuffer getSharedBuffer(String name)
    {
       return sharedBuffers.get(name);

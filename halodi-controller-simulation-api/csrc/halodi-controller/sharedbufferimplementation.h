@@ -11,7 +11,7 @@ namespace halodi_controller
         SharedBufferImplementation(int32_t size, char *const data_);
 
         int32_t size();
-        char *const data();
+        char * data();
 
         virtual ~SharedBufferImplementation();
 

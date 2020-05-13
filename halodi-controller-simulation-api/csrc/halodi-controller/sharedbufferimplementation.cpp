@@ -15,7 +15,7 @@ int32_t SharedBufferImplementation::size()
     return bufferSize;
 }
 
-char * const SharedBufferImplementation::data()
+char *SharedBufferImplementation::data()
 {
     return dataBuffer;
 }

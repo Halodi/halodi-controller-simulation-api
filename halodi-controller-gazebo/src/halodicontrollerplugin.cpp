@@ -131,7 +131,7 @@ public:
         try
         {
 
-            std::string controllerArguments = "--pubsub FAST_RTPS_SYSTEM_LIBRARY --variableserver";
+            std::string controllerArguments = "--pubsub FAST_RTPS_SYSTEM_LIBRARY --enable-graphs";
             controller = HalodiController::create("NativePluginEveSimulation");
 
 

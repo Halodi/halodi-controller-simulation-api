@@ -125,7 +125,7 @@ public:
     /**
      * @brief data Data array
      */
-    virtual char *const data() = 0;
+    virtual char* data() = 0;
 };
 
 class HalodiController
