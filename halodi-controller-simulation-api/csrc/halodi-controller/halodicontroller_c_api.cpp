@@ -113,6 +113,12 @@ double *halodi_controller_add_force_torque_sensor(char *parentLink, char *name)
 }
 
 
+char *halodi_controller_create_shared_buffer(char *name, int32_t size)
+{
+    std::shared_ptr<SharedBuffer> sharedBuffer = controller->createSharedBuffer(std::string(name), size);
+    return sharedBuffer->data();
+}
+
 bool halodi_controller_initialize(char *arguments)
 {
     return controller->initialize(std::string(arguments));
@@ -141,11 +147,19 @@ char *halodi_controller_get_controller_description()
     return to_c_str(desc);
 }
 
-char *halodi_controller_get_controller_configuration()
+char *halodi_controller_get_virtual_machine_configuration()
 {
-    std::string desc = controller->getControllerConfiguration();
+    std::string desc = controller->getVirtualMachineConfiguration();
     return to_c_str(desc);
 }
+
+
+char *halodi_controller_call_controller(char *request, char *arguments)
+{
+    std::string reply = controller->callController(std::string(request), std::string(arguments));
+    return to_c_str(reply);
+}
+
 
 void halodi_controller_attach_current_thread()
 {

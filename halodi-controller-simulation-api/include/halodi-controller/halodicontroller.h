@@ -112,6 +112,22 @@ public:
 
 };
 
+class SharedBuffer
+{
+public:
+    /**
+     * @brief size size of the data
+     *
+     * Due to addressing inside the virtual machine, the maximum size is 31 bits (signed 32bit int).
+     */
+    virtual int32_t size() = 0;
+
+    /**
+     * @brief data Data array
+     */
+    virtual char *const data() = 0;
+};
+
 class HalodiController
 {
 public:
@@ -199,19 +215,20 @@ public:
 
 
     /**
-     * @brief getControllerConfiguration Get a JSON description of the controller configuration
+     * @brief getControllerConfiguration Get a JSON description of the virtual machine configuration
      *
      * Data format:
      * {
-     *      "workingDirectory": "",
+     *      "name": ""
+     *      "classPath": [ "" ],
      *      "mainClass": "",
-     *      "classPath": "",
-     *      "vmOptions": ""
+     *      "vmArgs": [ "" ],
+     *      "javaHome": ""
      * }
      *
-     * @return json description matching the ControllerConfiguration passed into Create()
+     * @return json description of the Virtual machine configuration
      */
-    virtual std::string getControllerConfiguration() = 0;
+    virtual std::string getVirtualMachineConfiguration() = 0;
 
 
     /**
@@ -231,6 +248,28 @@ public:
      * Note: Detatching and re-attaching is expensive, avoid as much as possible.
      */
     virtual void deattachCurrentThread() = 0;
+
+
+    /**
+     * @brief callController [Optional] Call a function on the controller
+     *
+     * @param request Request to be send to the controller.
+     * @param arguments Arguments to the request
+     * @return reply Reply from the controller
+     */
+    virtual std::string callController(std::string request, std::string arguments) = 0;
+
+
+    /**
+     * @brief createSharedBuffer [Optional] Create a buffer shared between the controller and the simulator
+     *
+     * Size and layout is to be negotiated using callController().
+     *
+     * @param name Name of the buffer
+     * @param size Size in bytes
+     * @return Pointer to shared buffer
+     */
+    virtual std::shared_ptr<SharedBuffer> createSharedBuffer(std::string name, int32_t size)  = 0;
 
 };
 

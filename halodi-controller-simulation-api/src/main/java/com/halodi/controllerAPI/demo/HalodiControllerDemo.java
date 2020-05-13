@@ -22,9 +22,13 @@ public class HalodiControllerDemo extends NativeHalodiControllerJavaBridge
    {
       System.out.println("Running tick " + time +  " for " + duration);
       
+      System.out.println("\tShared buffer value:" + getSharedBuffer("DemoBuffer").getBuffer().getDouble(0));
+      
       getJoint("joint1").setDesiredEffort(time * 2.0);
       getJoint("joint2").setDesiredEffort(-time);
       
+      
+      getSharedBuffer("DemoBuffer").getBuffer().putDouble(8, time * 4.0);
    }
 
    @Override
@@ -44,6 +48,13 @@ public class HalodiControllerDemo extends NativeHalodiControllerJavaBridge
    {
       System.out.println("Shutting down controller");
 
+   }
+
+   @Override
+   public String callController(String functionName, String arguments)
+   {
+      return "Called " +  functionName + " with arguments: " + arguments;
+      
    }
 
 }

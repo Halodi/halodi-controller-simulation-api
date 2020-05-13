@@ -7,6 +7,7 @@ add_library(halodi-controller-api SHARED
     NativeIMUHandleHolder.cpp
     NativeEffortJointHandleHolder.cpp
     NativeForceTorqueSensorHandleHolder.cpp
+    sharedbufferimplementation.cpp
     ${PLATFORM_SUPPORT})
 target_link_libraries(halodi-controller-api jvmLauncher platform)
 

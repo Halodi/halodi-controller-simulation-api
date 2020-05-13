@@ -4,6 +4,7 @@
 #include "NativeEffortJointHandlerHolder.h"
 #include "NativeForceTorqueSensorHandleHolder.h"
 #include "NativeIMUHandleHolder.h"
+#include "sharedbufferimplementation.h"
 
 #include <stdexcept>
 
@@ -31,6 +32,12 @@ HalodiControllerImplementation::HalodiControllerImplementation(std::string contr
     jStop = vm->getJavaMethod(mainClass, "stopFromNative", "()Z");
     jShutdown = vm->getJavaMethod(mainClass, "shutdownFromNative", "()V");
     jGetControllerDescription = vm->getJavaMethod(mainClass, "getControllerDescriptionFromNative", "()Ljava/lang/String;");
+
+    jCallController = vm->getJavaMethod(mainClass, "callControllerFromNative", "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
+    jCreateSharedBuffer = vm->getJavaMethod(mainClass, "createSharedBuffer", "(Ljava/lang/String;I)Ljava/nio/ByteBuffer;");
+
+
+
 }
 
 std::shared_ptr<JointHandle> HalodiControllerImplementation::addJoint(std::string name)
@@ -86,7 +93,7 @@ std::string HalodiControllerImplementation::getControllerDescription()
     return jGetControllerDescription->callStringMethod(bridge);
 }
 
-std::string HalodiControllerImplementation::getControllerConfiguration()
+std::string HalodiControllerImplementation::getVirtualMachineConfiguration()
 {
     return configurationLoader.jsonConfiguration;
 }
@@ -99,6 +106,21 @@ void HalodiControllerImplementation::attachCurrentThread()
 void HalodiControllerImplementation::deattachCurrentThread()
 {
     vm->detachCurrentThread();
+}
+
+std::string HalodiControllerImplementation::callController(std::string request, std::string arguments)
+{
+    std::shared_ptr<JavaString> jRequest = vm->createJavaString(request);
+    std::shared_ptr<JavaString> jArguments = vm->createJavaString(arguments);
+
+    return jCallController->callStringMethod(bridge, jRequest->native(), jArguments->native());
+}
+
+std::shared_ptr<SharedBuffer> HalodiControllerImplementation::createSharedBuffer(std::string name, int32_t size)
+{
+    std::shared_ptr<JavaString> jName = vm->createJavaString(name);
+    char* const buffer= (char*) jCreateSharedBuffer->callBytebufferMethod(bridge, size, jName->native(), size);
+    return std::make_shared<SharedBufferImplementation>(size, buffer);
 }
 
 HalodiControllerImplementation::~HalodiControllerImplementation()

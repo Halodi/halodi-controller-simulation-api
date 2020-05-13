@@ -11,6 +11,8 @@ import com.halodi.controllerAPI.wholeRobot.ForceTorqueSensorHandle;
 import com.halodi.controllerAPI.wholeRobot.ForceTorqueSensorHandleImpl;
 import com.halodi.controllerAPI.wholeRobot.IMUHandle;
 import com.halodi.controllerAPI.wholeRobot.IMUHandleImpl;
+import com.halodi.controllerAPI.wholeRobot.SharedBuffer;
+import com.halodi.controllerAPI.wholeRobot.SharedBufferImpl;
 
 public abstract class NativeHalodiControllerJavaBridge implements HalodiControllerJavaBridge, HalodiControllerElements
 {
@@ -20,6 +22,7 @@ public abstract class NativeHalodiControllerJavaBridge implements HalodiControll
    private final HashMap<String, EffortJointHandleImpl> joints = new HashMap<>();
    private final HashMap<String, IMUHandleImpl> imus = new HashMap<>();
    private final HashMap<String, ForceTorqueSensorHandleImpl> forceTorqueSensors = new HashMap<>();
+   private final HashMap<String, SharedBufferImpl> sharedBuffers = new HashMap<>();
 
    /**
     * Create a new JointStateHandle. Called from native layer
@@ -78,6 +81,34 @@ public abstract class NativeHalodiControllerJavaBridge implements HalodiControll
       forceTorqueSensors.put(name, forceTorqueSensorHandle);
       return forceTorqueSensorHandle.getBuffer();
    }
+   
+   
+   /**
+    * Return a shared buffer. Called from native layer
+    * 
+    * @param name
+    * @param size
+    * @return
+    */
+   synchronized ByteBuffer createSharedBuffer(String name, int size)
+   {
+      
+      if(sharedBuffers.containsKey(name))
+      {
+         if(sharedBuffers.get(name).getBuffer().capacity() < size)
+         {
+            System.err.println("Requested buffer with name " + name + " already exists but is smaller than requested size.");
+            return null;
+         }
+         
+         return sharedBuffers.get(name).getBuffer();
+      }
+      
+      SharedBufferImpl sharedBuffer = new SharedBufferImpl(name, size);
+      sharedBuffers.put(name, sharedBuffer);
+      return sharedBuffer.getBuffer();
+   }
+   
    
 
    synchronized boolean initFromNative(String arguments)
@@ -168,6 +199,19 @@ public abstract class NativeHalodiControllerJavaBridge implements HalodiControll
       } 
    }
    
+   String callControllerFromNative(String request, String arguments)
+   {
+      try
+      {
+         return callController(request, arguments);
+      }
+      catch (Throwable t)
+      {
+         t.printStackTrace();
+         return "";
+      }
+   }
+   
    
    
    private void addSetToJSON(StringBuilder json, String name, Set<String> elements)
@@ -241,5 +285,10 @@ public abstract class NativeHalodiControllerJavaBridge implements HalodiControll
    {
       return forceTorqueSensors.get(qualifiedName);
    }
-   
+ 
+   @Override
+   public SharedBuffer getSharedBuffer(String name)
+   {
+      return sharedBuffers.get(name);
+   }
 }

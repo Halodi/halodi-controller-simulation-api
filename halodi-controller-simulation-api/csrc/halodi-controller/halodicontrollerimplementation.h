@@ -26,12 +26,14 @@ public:
     bool stop();
 
     std::string getControllerDescription();
-    std::string getControllerConfiguration();
+    std::string getVirtualMachineConfiguration();
 
 
     void attachCurrentThread();
     void deattachCurrentThread();
 
+    std::string callController(std::string request, std::string arguments);
+    std::shared_ptr<SharedBuffer> createSharedBuffer(std::string name, int32_t size);
 
     virtual ~HalodiControllerImplementation();
 
@@ -52,6 +54,8 @@ private:
     std::shared_ptr<JavaMethod> jShutdown;
 
     std::shared_ptr<JavaMethod> jGetControllerDescription;
+    std::shared_ptr<JavaMethod> jCallController;
+    std::shared_ptr<JavaMethod> jCreateSharedBuffer;
 };
 
 
