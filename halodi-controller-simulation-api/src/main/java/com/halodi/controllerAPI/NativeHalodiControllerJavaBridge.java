@@ -260,6 +260,8 @@ public abstract class NativeHalodiControllerJavaBridge implements HalodiControll
       addSetToJSON(json, "imus", imus.keySet());
       json.append(',');
       addSetToJSON(json, "forceTorqueSensors", forceTorqueSensors.keySet());
+      json.append(',');
+      addSetToJSON(json, "sharedBuffers", sharedBuffers.keySet());
       
       
       json.append("}");
