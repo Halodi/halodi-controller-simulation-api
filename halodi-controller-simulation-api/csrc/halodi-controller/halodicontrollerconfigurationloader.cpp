@@ -3,6 +3,8 @@
 #include <fstream>
 #include <stdexcept>
 #include <nlohmann/json.hpp>
+#include <sstream>
+#include <filesystem>
 
 #include "../platform/platform.h"
 
@@ -14,9 +16,9 @@ using json = nlohmann::json;
 HalodiControllerConfigurationLoader::HalodiControllerConfigurationLoader(std::string controllerName_)
 {
 
-    std::string localAppData = halodi_platform::getLocalAppData();
+    std::filesystem::path localAppData = halodi_platform::getLocalAppData();
 
-    std::string configurationFile = halodi_platform::appendToPath(halodi_platform::appendToPath(localAppData, company), configFile);
+    std::filesystem::path configurationFile = localAppData / company / configFile;
 
 
 
@@ -24,8 +26,11 @@ HalodiControllerConfigurationLoader::HalodiControllerConfigurationLoader(std::st
 
     if(!configurationStream.is_open())
     {
-        std::cerr << "Cannot open " + configurationFile << std::endl;
-        throw new std::runtime_error("Cannot open " + configurationFile);
+        std::stringstream err;
+        err << "Cannot open " << configurationFile;
+
+        std::cerr << err.str() << std::endl;
+        throw new std::runtime_error(err.str());
     }
 
     json config;
@@ -45,6 +50,10 @@ HalodiControllerConfigurationLoader::HalodiControllerConfigurationLoader(std::st
             name = plugin["name"];
             javaHome = plugin["javaHome"];
             mainClass = plugin["mainClass"];
+
+            std::cout << name << std::endl;
+            std::cout << javaHome << std::endl;
+            std::cout << mainClass << std::endl;
 
             for(auto& classPathElement : plugin["classPath"])
             {

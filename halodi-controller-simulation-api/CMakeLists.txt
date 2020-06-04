@@ -6,6 +6,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 set(CMAKE_BUILD_TYPE RelWithDebInfo)
 
+set (CMAKE_CXX_STANDARD 17)
 
 
 find_package(ament_cmake)

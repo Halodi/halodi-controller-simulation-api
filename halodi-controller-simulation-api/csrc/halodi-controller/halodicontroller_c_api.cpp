@@ -7,6 +7,47 @@
 
 #include <iostream>
 
+
+#ifdef WIN32
+#include <io.h>
+#include <windows.h>
+#include <fcntl.h>
+
+
+void halodi_controller_reopen_file(char const* _FileName,
+    char const* _Mode,
+    FILE* _Stream
+)
+{
+    /*
+    HANDLE h = CreateFile(TEXT(_FileName), GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
+        nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL,
+        nullptr);
+    if (h == INVALID_HANDLE_VALUE)
+    {
+        return;
+    }
+    int fd = _open_osfhandle(reinterpret_cast<intptr_t>(h), _O_WRONLY);
+    if (fd == -1)
+    {
+        return;
+    }
+
+    _dup2(fd, _fileno(_Stream));
+
+    _close(fd);
+    */
+}
+#else
+void reopenFile(char const* _FileName,
+    char const* _Mode,
+    FILE* _Stream
+)
+{
+    if (freopen(_FileName, _Mode, _Stream) == 0);
+}
+#endif
+
 using namespace halodi_controller;
 
 
@@ -26,8 +67,8 @@ char* to_c_str(std::string str)
 void halodi_controller_redirect_output(char *stdoutFilename, char *stderrFilename)
 {
 
-    if(freopen(stdoutFilename, "a", stdout) == 0);
-    if(freopen(stderrFilename, "a", stderr) == 0);
+    halodi_controller_reopen_file(stdoutFilename, "w", stdout);
+    halodi_controller_reopen_file(stderrFilename, "w", stderr);
 
 }
 

@@ -5,13 +5,9 @@
 #include <algorithm>
 #include <vector>
 
-#include <unistd.h>
-#include <linux/limits.h>
-#include <dirent.h>
+#include <filesystem>
 
 #include <stdexcept>
-
-#include <glob.h>
 
 #include "../platform/platform.h"
 
@@ -68,36 +64,8 @@ void JavaVirtualMachine::detachCurrentThread()
 }
 
 
-std::string JavaVirtualMachine::expandClasspath(std::vector<std::string> classpathElementsIn)
+std::string JavaVirtualMachine::expandClasspath(std::vector<std::string> classpathElements)
 {
-
-
-    std::vector<std::string> classpathElements;
-
-    for(std::string& classpathElement : classpathElementsIn)
-    {
-
-        if(!classpathElement.empty())
-        {
-            glob_t glob_result = {};
-
-            int ret = glob(classpathElement.c_str(), GLOB_TILDE, NULL, &glob_result);
-            if(ret == 0)
-            {
-                for(size_t i = 0; i < glob_result.gl_pathc; ++i)
-                {
-                    classpathElements.push_back(std::string(glob_result.gl_pathv[i]));
-                }
-            }
-            else
-            {
-                classpathElements.push_back(classpathElement);
-            }
-
-            globfree(&glob_result);
-        }
-    }
-
 
     if(classpathElements.empty())
     {
@@ -133,14 +101,16 @@ JavaVirtualMachine::JavaVirtualMachine(std::string javaHome, std::string working
 
    halodi_platform::CreateJavaVM createJavaVM = nullptr;
 
-    if (!halodi_platform::loadJNIFunctions(javaHome, &createJavaVM)) {
+   std::filesystem::path javaPath(javaHome);
+
+    if (!halodi_platform::loadJNIFunctions(javaPath, &createJavaVM)) {
         throw std::runtime_error("Error: failed to load VM runtime library!");
     }
 
     JavaVMOption* javaOptions = new JavaVMOption[options.size()];
 
     int argc = 0;
-    for(uint i = 0; i < options.size(); i++)
+    for(uint32_t i = 0; i < options.size(); i++)
     {
         if(options.at(i) != "-")
         {
@@ -155,13 +125,18 @@ JavaVirtualMachine::JavaVirtualMachine(std::string javaHome, std::string working
 
 
 
+    std::filesystem::path currentDirectory = std::filesystem::current_path();
 
-    DIR* currentDirectory = opendir(".");
-    if(workingDirectory != "." && workingDirectory != "")
+    if (workingDirectory != "." && workingDirectory != "")
     {
-        if(chdir(workingDirectory.c_str()) < 0)
+        std::filesystem::path workingPath(workingDirectory);
+
+        try
         {
-            closedir(currentDirectory);
+            std::filesystem::current_path(workingPath);
+        }
+        catch (...)
+        {
             jvm = nullptr;
 
             throw std::runtime_error("Cannot change directory to " + workingDirectory);
@@ -169,9 +144,7 @@ JavaVirtualMachine::JavaVirtualMachine(std::string javaHome, std::string working
 
     }
 
-    char temp [PATH_MAX];
-    if(getcwd(temp, PATH_MAX) == 0); // Ignore return type
-    std::cout << "Starting Java VM from path  " << temp << std::endl;
+    std::cout << "Starting Java VM from path  " << std::filesystem::current_path() << std::endl;
 
 
 
@@ -182,12 +155,16 @@ JavaVirtualMachine::JavaVirtualMachine(std::string javaHome, std::string working
 
     if(workingDirectory != ".")
     {
-        if(fchdir(dirfd(currentDirectory)) != 0)
+        try
+        {
+            std::filesystem::current_path(currentDirectory);
+        }
+        catch (...)
         {
             std::cerr << "Cannot return to previous working directory" << std::endl;
         }
     }
-    closedir(currentDirectory);
+
     if(res != JNI_OK)
     {
         jvm = nullptr;
@@ -362,7 +339,7 @@ void JavaMethod::callVoidMethod(std::shared_ptr<JavaObject> obj, ...)
     }
     else
     {
-        throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": Unexpected object type");
+        throw std::runtime_error(std::string(__FUNCTION__) + ": Unexpected object type");
     }
 }
 
@@ -379,12 +356,12 @@ void* JavaMethod::callBytebufferMethod(std::shared_ptr<JavaObject> obj, int mini
 
         if(!byteBuffer)
         {
-            throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": Bytebuffer is null");
+            throw std::runtime_error(std::string(__FUNCTION__) + ": Bytebuffer is null");
         }
 
         if(env->GetDirectBufferCapacity(byteBuffer) < minimumCapacity)
         {
-            throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": Bytebuffer is smaller than minimumCapacity");
+            throw std::runtime_error(std::string(__FUNCTION__) + ": Bytebuffer is smaller than minimumCapacity");
         }
 
         return env->GetDirectBufferAddress(byteBuffer);
@@ -392,7 +369,7 @@ void* JavaMethod::callBytebufferMethod(std::shared_ptr<JavaObject> obj, int mini
     }
     else
     {
-        throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": Unexpected object type");
+        throw std::runtime_error(std::string(__FUNCTION__) + ": Unexpected object type");
     }
 }
 
@@ -409,7 +386,7 @@ std::string JavaMethod::callStringMethod(std::shared_ptr<JavaObject> obj, ...)
 
         if(!javaString)
         {
-            throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": String is null");
+            throw std::runtime_error(std::string(__FUNCTION__) + ": String is null");
         }
 
         const char* cstr = env->GetStringUTFChars(javaString, 0);
@@ -420,7 +397,7 @@ std::string JavaMethod::callStringMethod(std::shared_ptr<JavaObject> obj, ...)
     }
     else
     {
-        throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": Unexpected object type");
+        throw std::runtime_error(std::string(__FUNCTION__) + ": Unexpected object type");
     }
 }
 
@@ -438,7 +415,7 @@ jboolean JavaMethod::callBooleanMethod(std::shared_ptr<JavaObject> obj, ...)
     }
     else
     {
-        throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": Unexpected object type");
+        throw std::runtime_error(std::string(__FUNCTION__) + ": Unexpected object type");
     }
 
     return returnValue;
@@ -458,7 +435,7 @@ jdouble JavaMethod::callDoubleMethod(std::shared_ptr<JavaObject> obj, ...)
     }
     else
     {
-        throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": Unexpected object type");
+        throw std::runtime_error(std::string(__FUNCTION__) + ": Unexpected object type");
     }
 
     return returnValue;
@@ -480,7 +457,7 @@ std::shared_ptr<JavaObject> JavaMethod::createObject(jargument_t arg, ...)
     }
     else
     {
-        throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": Cannot create new object");
+        throw std::runtime_error(std::string(__FUNCTION__) + ": Cannot create new object");
     }
 }
 

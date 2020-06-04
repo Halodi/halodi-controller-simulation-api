@@ -1,7 +1,9 @@
 package com.halodi.controllerAPI.util;
 
+import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -25,7 +27,17 @@ public class HalodiControllerPluginConfigurationCreator
 
       for (URL url : urls)
       {
-         String file = url.getFile();
+    	  String file;
+		try 
+		{
+			file = new File(url.toURI()).getAbsolutePath();
+			System.out.println(file);
+		} 
+		catch (URISyntaxException e) 
+		{
+			e.printStackTrace();
+			continue;
+		}
          
          if(ignore(file))
          {
@@ -33,9 +45,8 @@ public class HalodiControllerPluginConfigurationCreator
          }
          else
          {
-            config.classPath.add(url.getFile());
+            config.classPath.add(file);
          }
-         
          
       }
 

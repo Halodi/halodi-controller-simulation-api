@@ -2,14 +2,16 @@
 #include <string>
 #include <jni.h>
 
+
+#include <filesystem>
+
+
 namespace  halodi_platform {
-    std::string getLocalAppData();
-
-    std::string appendToPath(std::string path, std::string pathToAppend);
-
+    std::filesystem::path getLocalAppData();
 
 
     typedef jint(JNICALL *CreateJavaVM)(JavaVM**, void**, void*);
-    bool loadJNIFunctions(std::string javaHome, CreateJavaVM* createJavaVM);
+    bool loadJNIFunctions(std::filesystem::path javaHome, CreateJavaVM* createJavaVM);
+
 }
 

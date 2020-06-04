@@ -3,10 +3,16 @@
 #include <string>
 #include <memory>
 
+#ifdef WIN32
+#define DLL_EXPORT __declspec(dllexport)
+#else
+#define DLL_EXPORT
+#endif
+
 namespace halodi_controller
 {
 
-class JointHandle
+class DLL_EXPORT JointHandle
 {
 public:
     /**
@@ -56,7 +62,7 @@ public:
     virtual double getInitialAngle() = 0;
 };
 
-class IMUHandle
+class DLL_EXPORT IMUHandle
 {
 public:
 
@@ -91,7 +97,7 @@ public:
 };
 
 
-class ForceTorqueSensorHandle
+class DLL_EXPORT ForceTorqueSensorHandle
 {
 public:
     /**
@@ -112,7 +118,7 @@ public:
 
 };
 
-class SharedBuffer
+class DLL_EXPORT SharedBuffer
 {
 public:
     /**
@@ -128,7 +134,7 @@ public:
     virtual char* data() = 0;
 };
 
-class HalodiController
+class DLL_EXPORT HalodiController
 {
 public:
     /**

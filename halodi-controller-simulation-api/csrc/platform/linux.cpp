@@ -13,7 +13,7 @@
 
 namespace  halodi_platform {
 
-std::string getHomeDirectory()
+std::filesystem::path getHomeDirectory()
 {
     const char *homedir;
 
@@ -23,28 +23,22 @@ std::string getHomeDirectory()
         homedir = getpwuid(getuid())->pw_dir;
     }
 
-    return std::string(homedir);
+    return std::filesystem::path(homedir);
 }
 
-std::string getLocalAppData()
+std::filesystem::path getLocalAppData()
 {
     const char *localAppData;
 
     if ((localAppData = getenv("XDG_DATA_HOME")) == NULL)
     {
-        return getHomeDirectory() + "/.local/share";
+        return getHomeDirectory() / ".local" /  "share";
     }
     else
     {
-        return std::string(localAppData);
+        return std::filesystem::path(localAppData);
     }
 }
-
-std::string appendToPath(std::string path, std::string pathToAppend)
-{
-    return path + "/" + pathToAppend;
-}
-
 
 /**
  * @brief loadJNIFunctions
@@ -61,9 +55,9 @@ bool loadJNIFunctions(std::string javaHome, CreateJavaVM* createJavaVM)
 
 
 #if defined(__LP64__)
-    std::string libJVMPath = appendToPath(javaHome, "lib/amd64/server/libjvm.so");
+    std::filesystem::path libJVMPath = javaHome / "lib" / "amd64" / "server" / "libjvm.so");
 #else
-    std::string libJVMPath = appendToPath(javaHome, "lib/i386/server/libjvm.so");
+    std::filesystem::path libJVMPath = javaHome / "lib" / "i386" / "server" / "libjvm.so");
 #endif
 
     void* handle = dlopen(libJVMPath.c_str(), RTLD_LAZY);
@@ -81,5 +75,7 @@ bool loadJNIFunctions(std::string javaHome, CreateJavaVM* createJavaVM)
 
     return true;
 }
+
+
 }
 

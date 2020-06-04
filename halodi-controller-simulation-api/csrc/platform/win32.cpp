@@ -4,39 +4,34 @@
 #include <ShlObj.h>
 #include <wchar.h>
 #include <string>
+#include <sstream>
 
 #include <io.h>
 #include <fcntl.h>
 #include <iostream>
 #include <direct.h>
 
+#include <filesystem>
 #include "platform.h"
 
 namespace  halodi_platform {
 
-std::string getLocalAppData()
+std::filesystem::path getLocalAppData()
 {
 
     PWSTR path = NULL;
-    HRESULT hr = SHGetKnownFolderPath(&FOLDERID_LocalAppData, 0, NULL, &path);
+    HRESULT hr = SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, NULL, &path);
 
     if (!SUCCEEDED(hr))
     {
         throw new std::runtime_error("Cannot get local path");
     }
 
-    std::wstring localAppDataWide = std::wstring(path);
-    std::string localAppData = std::string(localAppDataWide.begin(), localAppDataWide.end());
-
     CoTaskMemFree(path);
 
-    return localAppData;
+    std::filesystem::path fsPath(path);
+    return fsPath;
 
-}
-
-std::string appendToPath(std::string path, std::string pathToAppend)
-{
-    return path + "\\" + pathToAppend;
 }
 
 
@@ -53,29 +48,25 @@ static void printLastError(const char* reason) {
         LocalFree(buffer);
 }
 
-bool loadJNIFunctions(std::string javaHome, GetDefaultJavaVMInitArgs* getDefaultJavaVMInitArgs, CreateJavaVM* createJavaVM)
+bool loadJNIFunctions(std::filesystem::path javaHome, CreateJavaVM* createJavaVM)
 {
+        std::filesystem::path jvmDll = javaHome / "bin" / "server" / "jvm.dll";
 
-        std::string jvmDll = appendToPath(javaHome, "bin\\server\\jvm.dll");
-
-        LPCTSTR jvmDLLPath = TEXT(jvmDll.c_str());
-
-        HINSTANCE hinstLib = LoadLibrary(jvmDLLPath);
+        HINSTANCE hinstLib = LoadLibraryW(jvmDll.c_str());
         if (hinstLib == nullptr) {
                 DWORD errorCode = GetLastError();
                 if (errorCode == 126) {
 
                         // "The specified module could not be found."
                         // load msvcr100.dll from the bundled JRE, then try again
-                        if (verbose) {
-                                std::cerr << "Failed to load jvm.dll. Trying to load msvcr100.dll first ..." << std:endl;
-                        }
+                        
+                        std::cerr << "Failed to load jvm.dll. Trying to load msvcr100.dll first ..." << std::endl;
+                
+                        std::filesystem::path msvcr100 = javaHome / "bin" / "msvcr100.dll";
 
-                        std::string msvcr100 = appendToPath(javaHome, "bin\\msvcr100.dll");
-
-                        HINSTANCE hinstVCR = LoadLibrary(TEXT(msvcr100.c_str()));
+                        HINSTANCE hinstVCR = LoadLibraryW(msvcr100.c_str());
                         if (hinstVCR != nullptr) {
-                                hinstLib = LoadLibrary(jvmDLLPath);
+                                hinstLib = LoadLibraryW(jvmDll.c_str());
                         }
                 }
         }
@@ -85,11 +76,6 @@ bool loadJNIFunctions(std::string javaHome, GetDefaultJavaVMInitArgs* getDefault
                 return false;
         }
 
-        *getDefaultJavaVMInitArgs = (GetDefaultJavaVMInitArgs) GetProcAddress(hinstLib, "JNI_GetDefaultJavaVMInitArgs");
-        if (*getDefaultJavaVMInitArgs == nullptr) {
-                printLastError("obtain JNI_GetDefaultJavaVMInitArgs address");
-                return false;
-        }
 
         *createJavaVM = (CreateJavaVM) GetProcAddress(hinstLib, "JNI_CreateJavaVM");
         if (*createJavaVM == nullptr) {
