@@ -6,6 +6,8 @@
 #include "NativeIMUHandleHolder.h"
 
 #include <iostream>
+#include <mutex>
+#include <queue>
 
 using namespace halodi_controller;
 
@@ -13,7 +15,11 @@ using namespace halodi_controller;
 std::shared_ptr<HalodiController> halodi_controller_ptr;
 std::string halodi_controller_last_error;
 
+std::mutex halodi_controller_sync;
 halodi_controller_c_output_handler_delegate halodi_controller_c_output_handler = nullptr;
+
+bool halodi_controller_console_enable_queue = false;
+std::queue<std::string> halodi_controller_console_queue;
 
 char* halodi_controller_to_c_str(std::string str)
 {
@@ -28,9 +34,10 @@ char* halodi_controller_to_c_str(std::string str)
 
 void halodi_controller_c_output_handler_callback(bool standardError, std::string message)
 {
-    if(halodi_controller_c_output_handler != nullptr)
+    if(halodi_controller_console_enable_queue)
     {
-        halodi_controller_c_output_handler(standardError, halodi_controller_to_c_str(message));
+        const std::lock_guard<std::mutex> lock(halodi_controller_sync);
+        halodi_controller_console_queue.push(message);
     }
     else
     {
@@ -47,6 +54,9 @@ void halodi_controller_c_output_handler_callback(bool standardError, std::string
 
 bool halodi_controller_create(char* controllerName_, char *workingDirectory_)
 {
+
+    freopen("stdout.txt", "a", stdout);
+    freopen("stderr.txt", "a", stderr);
 
     if(halodi_controller_ptr)
     {
@@ -205,7 +215,24 @@ char *halodi_controller_get_last_error()
     return halodi_controller_to_c_str(halodi_controller_last_error);
 }
 
-void halodi_controller_set_output_delegate(halodi_controller_c_output_handler_delegate delegate)
+
+char *halodi_controller_get_console_line()
 {
-    halodi_controller_c_output_handler = delegate;
+    const std::lock_guard<std::mutex> lock(halodi_controller_sync);
+    if(halodi_controller_console_queue.empty())
+    {
+        return nullptr;
+    }
+    else
+    {
+        char * msg = halodi_controller_to_c_str(halodi_controller_console_queue.front());
+        halodi_controller_console_queue.pop();
+        return msg;
+    }
+
+}
+
+void halodi_controller_queue_console()
+{
+    halodi_controller_console_enable_queue = true;
 }

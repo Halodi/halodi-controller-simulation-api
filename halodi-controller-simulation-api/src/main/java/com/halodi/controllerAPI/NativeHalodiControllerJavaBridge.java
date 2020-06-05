@@ -60,8 +60,6 @@ public abstract class NativeHalodiControllerJavaBridge implements HalodiControll
          }
       });
       
-      System.out.println("Calling from Java");
-      System.err.println("STD Err from java");
    }
    
    public void log(boolean stderr, String out)

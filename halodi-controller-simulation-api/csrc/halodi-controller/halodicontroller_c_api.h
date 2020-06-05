@@ -15,9 +15,6 @@ extern "C"
 
     DLL_EXPORT bool halodi_controller_created();
 
-    DLL_EXPORT void halodi_controller_set_output_delegate(halodi_controller_c_output_handler_delegate delegate);
-
-
     DLL_EXPORT double* halodi_controller_add_joint(char* name);
     DLL_EXPORT double* halodi_controller_add_imu(char* parentLink, char* name);
     DLL_EXPORT double* halodi_controller_add_force_torque_sensor(char* parentLink, char* name);
@@ -43,4 +40,7 @@ extern "C"
 
     DLL_EXPORT char* halodi_controller_get_last_error();
     DLL_EXPORT void halodi_controller_free_string(char* str);
+
+    DLL_EXPORT void halodi_controller_queue_console();
+    DLL_EXPORT char *halodi_controller_get_console_line();
 }

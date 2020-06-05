@@ -31,7 +31,7 @@ public interface HalodiControllerJavaBridge
    /**
     * Stop the controller. Allow for restart using start()
     * 
-    * After stop() is called, all sensor and joint ahndles are cleared.
+    * After stop() is called, all sensor and joint handles are cleared.
     */
    void stop();
    
