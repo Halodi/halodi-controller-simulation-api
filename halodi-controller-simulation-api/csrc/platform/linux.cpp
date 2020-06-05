@@ -13,7 +13,7 @@
 
 namespace  halodi_platform {
 
-std::filesystem::path getHomeDirectory()
+fs::path getHomeDirectory()
 {
     const char *homedir;
 
@@ -23,10 +23,10 @@ std::filesystem::path getHomeDirectory()
         homedir = getpwuid(getuid())->pw_dir;
     }
 
-    return std::filesystem::path(homedir);
+    return fs::path(homedir);
 }
 
-std::filesystem::path getLocalAppData()
+fs::path getLocalAppData()
 {
     const char *localAppData;
 
@@ -36,7 +36,7 @@ std::filesystem::path getLocalAppData()
     }
     else
     {
-        return std::filesystem::path(localAppData);
+        return fs::path(localAppData);
     }
 }
 
@@ -50,30 +50,26 @@ std::filesystem::path getLocalAppData()
  * @return
  */
 
-bool loadJNIFunctions(std::string javaHome, CreateJavaVM* createJavaVM)
+void loadJNIFunctions(fs::path javaHome, CreateJavaVM* createJavaVM)
 {
 
 
 #if defined(__LP64__)
-    std::filesystem::path libJVMPath = javaHome / "lib" / "amd64" / "server" / "libjvm.so");
+    fs::path libJVMPath = javaHome / "lib" / "amd64" / "server" / "libjvm.so";
 #else
-    std::filesystem::path libJVMPath = javaHome / "lib" / "i386" / "server" / "libjvm.so");
+    fs::path libJVMPath = javaHome / "lib" / "i386" / "server" / "libjvm.so";
 #endif
 
     void* handle = dlopen(libJVMPath.c_str(), RTLD_LAZY);
     if (handle == NULL) {
-        std::cerr << dlerror() << std::endl;
-        return false;
+        throw std::runtime_error("Cannot open libjvm.so: " + std::string(dlerror()));
     }
 
     *createJavaVM = (CreateJavaVM) dlsym(handle, "JNI_CreateJavaVM");
 
     if (*createJavaVM == nullptr) {
-        std::cerr << dlerror() << std::endl;
-        return false;
+        throw std::runtime_error("JNI_CreateJavaVM not found: " + std::string(dlerror()));
     }
-
-    return true;
 }
 
 

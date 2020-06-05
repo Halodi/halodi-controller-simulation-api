@@ -7,55 +7,17 @@
 
 #include <iostream>
 
-
-#ifdef WIN32
-#include <io.h>
-#include <windows.h>
-#include <fcntl.h>
-
-
-void halodi_controller_reopen_file(char const* _FileName,
-    char const* _Mode,
-    FILE* _Stream
-)
-{
-    /*
-    HANDLE h = CreateFile(TEXT(_FileName), GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
-        nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL,
-        nullptr);
-    if (h == INVALID_HANDLE_VALUE)
-    {
-        return;
-    }
-    int fd = _open_osfhandle(reinterpret_cast<intptr_t>(h), _O_WRONLY);
-    if (fd == -1)
-    {
-        return;
-    }
-
-    _dup2(fd, _fileno(_Stream));
-
-    _close(fd);
-    */
-}
-#else
-void reopenFile(char const* _FileName,
-    char const* _Mode,
-    FILE* _Stream
-)
-{
-    if (freopen(_FileName, _Mode, _Stream) == 0);
-}
-#endif
-
 using namespace halodi_controller;
 
 
-std::shared_ptr<HalodiController> controller;
+std::shared_ptr<HalodiController> halodi_controller_ptr;
+std::string halodi_controller_last_error;
 
-char* to_c_str(std::string str)
+halodi_controller_c_output_handler_delegate halodi_controller_c_output_handler = nullptr;
+
+char* halodi_controller_to_c_str(std::string str)
 {
-    // Make a copy on the heap to avoid invalidation as soon as the
+    // Make a copy on the heap to avoid invalidation as soon as the function returns
     char* buffer = new char[str.length() + 1];
     str.copy(buffer, str.length());
     buffer[str.length()] = '\0';
@@ -64,20 +26,31 @@ char* to_c_str(std::string str)
 }
 
 
-void halodi_controller_redirect_output(char *stdoutFilename, char *stderrFilename)
+void halodi_controller_c_output_handler_callback(bool standardError, std::string message)
 {
-
-    halodi_controller_reopen_file(stdoutFilename, "w", stdout);
-    halodi_controller_reopen_file(stderrFilename, "w", stderr);
-
+    if(halodi_controller_c_output_handler != nullptr)
+    {
+        halodi_controller_c_output_handler(standardError, halodi_controller_to_c_str(message));
+    }
+    else
+    {
+        if(standardError)
+        {
+            std::cerr << "[Controller (C)] " << message << std::endl;
+        }
+        else
+        {
+            std::cout << "[Controller (C)] " << message << std::endl;
+        }
+    }
 }
-
 
 bool halodi_controller_create(char* controllerName_, char *workingDirectory_)
 {
 
-    if(controller)
+    if(halodi_controller_ptr)
     {
+        halodi_controller_last_error = "Controller already created";
         return false;
     }
 
@@ -96,28 +69,31 @@ bool halodi_controller_create(char* controllerName_, char *workingDirectory_)
 
         if(controllerName_ == nullptr)
         {
-            std::cout << "Controller name not set." << std::endl;
+            halodi_controller_last_error = "Controller name not set.";
             return false;
         }
 
         std::string controllerName = std::string(controllerName_);
 
-        controller = HalodiController::create(controllerName, workingDirectory);
+        halodi_controller_ptr = HalodiController::create(controllerName, workingDirectory);
+
+        halodi_controller_ptr->setOutputHandler(halodi_controller_c_output_handler_callback);
 
         return true;
     }
     catch(std::runtime_error re)
     {
-        std::cerr << "Cannot start controller with runtime exception " <<  re.what() << std::endl;
+        halodi_controller_last_error = re.what();
         return false;
     }
     catch(std::exception e)
     {
-        std::cerr << "Cannot start controller with exception " <<  e.what() << std::endl;
+        halodi_controller_last_error = e.what();
         return false;
     }
     catch(...)
     {
+        halodi_controller_last_error = "Undefined error.";
         return false;
     }
 }
@@ -125,7 +101,7 @@ bool halodi_controller_create(char* controllerName_, char *workingDirectory_)
 
 bool halodi_controller_created()
 {
-    if(controller)
+    if(halodi_controller_ptr)
     {
         return true;
     }
@@ -137,85 +113,85 @@ bool halodi_controller_created()
 
 double *halodi_controller_add_joint(char *name)
 {
-    std::shared_ptr<JointHandle> joint = controller->addJoint(std::string(name));
+    std::shared_ptr<JointHandle> joint = halodi_controller_ptr->addJoint(std::string(name));
     return std::dynamic_pointer_cast<NativeEffortJointHandleHolder>(joint)->c_data();
 }
 
 double *halodi_controller_add_imu(char *parentLink, char *name)
 {
-    std::shared_ptr<IMUHandle> imu = controller->addIMU(std::string(parentLink), std::string(name));
+    std::shared_ptr<IMUHandle> imu = halodi_controller_ptr->addIMU(std::string(parentLink), std::string(name));
     return std::dynamic_pointer_cast<NativeIMUHandleHolder>(imu)->c_data();
 }
 
 double *halodi_controller_add_force_torque_sensor(char *parentLink, char *name)
 {
-    std::shared_ptr<ForceTorqueSensorHandle> forceTorqueSensor = controller->addForceTorqueSensor(std::string(parentLink), std::string(name));
+    std::shared_ptr<ForceTorqueSensorHandle> forceTorqueSensor = halodi_controller_ptr->addForceTorqueSensor(std::string(parentLink), std::string(name));
     return std::dynamic_pointer_cast<NativeForceTorqueSensorHandleHolder>(forceTorqueSensor)->c_data();
 }
 
 
 char *halodi_controller_create_shared_buffer(char *name, int32_t size)
 {
-    std::shared_ptr<SharedBuffer> sharedBuffer = controller->createSharedBuffer(std::string(name), size);
+    std::shared_ptr<SharedBuffer> sharedBuffer = halodi_controller_ptr->createSharedBuffer(std::string(name), size);
     return sharedBuffer->data();
 }
 
 bool halodi_controller_initialize(char *arguments)
 {
-    return controller->initialize(std::string(arguments));
+    return halodi_controller_ptr->initialize(std::string(arguments));
 }
 
 
 bool halodi_controller_start()
 {
-    return controller->start();
+    return halodi_controller_ptr->start();
 
 }
 
 bool halodi_controller_update(long long timeInNanoseconds, long long duration)
 {
-    return controller->update(timeInNanoseconds, duration);
+    return halodi_controller_ptr->update(timeInNanoseconds, duration);
 }
 
 bool halodi_controller_stop()
 {
-    return controller->stop();
+    return halodi_controller_ptr->stop();
 }
 
 char *halodi_controller_get_controller_description()
 {
-    std::string desc = controller->getControllerDescription();
-    return to_c_str(desc);
+    std::string desc = halodi_controller_ptr->getControllerDescription();
+    return halodi_controller_to_c_str(desc);
 }
 
 char *halodi_controller_get_virtual_machine_configuration()
 {
-    std::string desc = controller->getVirtualMachineConfiguration();
-    return to_c_str(desc);
+    std::string desc = halodi_controller_ptr->getVirtualMachineConfiguration();
+    return halodi_controller_to_c_str(desc);
 }
 
 
 char *halodi_controller_call_controller(char *request, char *arguments)
 {
-    std::string reply = controller->callController(std::string(request), std::string(arguments));
-    return to_c_str(reply);
+    std::string reply = halodi_controller_ptr->callController(std::string(request), std::string(arguments));
+    return halodi_controller_to_c_str(reply);
 }
 
 
 void halodi_controller_attach_current_thread()
 {
-    controller->attachCurrentThread();
+    halodi_controller_ptr->attachCurrentThread();
 }
 
 void halodi_controller_deattach_current_thread()
 {
-    controller->deattachCurrentThread();
+    halodi_controller_ptr->deattachCurrentThread();
 }
 
 
 void halodi_controller_destroy()
 {
-    controller.reset();
+    halodi_controller_ptr.reset();
 }
 
 void halodi_controller_free_string(char *str)
@@ -223,3 +199,13 @@ void halodi_controller_free_string(char *str)
     delete str;
 }
 
+
+char *halodi_controller_get_last_error()
+{
+    return halodi_controller_to_c_str(halodi_controller_last_error);
+}
+
+void halodi_controller_set_output_delegate(halodi_controller_c_output_handler_delegate delegate)
+{
+    halodi_controller_c_output_handler = delegate;
+}

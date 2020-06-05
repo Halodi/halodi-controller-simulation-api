@@ -8,6 +8,18 @@ int main(int argc, char *argv[])
 {
     std::shared_ptr<HalodiController> controller = HalodiController::create("HalodiControllerDemo");
 
+
+    controller->setOutputHandler( [](bool stdErr, std::string message) {
+        if(stdErr)
+        {
+            std::cerr << "[Demo Controller] " << message << std::endl;
+        }
+        else
+        {
+            std::cout << "[Demo Controller] " << message << std::endl;
+        }
+    });
+
     std::shared_ptr<JointHandle> joint1 = controller->addJoint("joint1");
     std::shared_ptr<JointHandle> joint2 = controller->addJoint("joint2");
     std::shared_ptr<IMUHandle> imu = controller->addIMU("pelvis", "imu");

@@ -100,7 +100,7 @@ private:
 
     JavaVM *jvm;
     JavaVMInitArgs vmArguments;
-    void displayJNIError(std::string prefix, int error);
+    std::string getJNIError(int error);
 
     jclass getClass(std::string className);
 
@@ -117,6 +117,8 @@ public:
     void registerNativeMethod(std::string className, std::string method, std::string signature, void* functionPointer);
 
     bool isAssignableFrom(std::string subclass, std::string superclass);
+
+    static std::string toCppString(JNIEnv* env, jstring javaString);
 
     JNIEnv* getEnv();
 

@@ -4,7 +4,6 @@
 #include <stdexcept>
 #include <nlohmann/json.hpp>
 #include <sstream>
-#include <filesystem>
 
 #include "../platform/platform.h"
 
@@ -16,9 +15,9 @@ using json = nlohmann::json;
 HalodiControllerConfigurationLoader::HalodiControllerConfigurationLoader(std::string controllerName_)
 {
 
-    std::filesystem::path localAppData = halodi_platform::getLocalAppData();
+    fs::path localAppData = halodi_platform::getLocalAppData();
 
-    std::filesystem::path configurationFile = localAppData / company / configFile;
+    fs::path configurationFile = localAppData / company / configFile;
 
 
 
@@ -28,9 +27,7 @@ HalodiControllerConfigurationLoader::HalodiControllerConfigurationLoader(std::st
     {
         std::stringstream err;
         err << "Cannot open " << configurationFile;
-
-        std::cerr << err.str() << std::endl;
-        throw new std::runtime_error(err.str());
+        throw std::runtime_error(err.str());
     }
 
     json config;
@@ -51,10 +48,6 @@ HalodiControllerConfigurationLoader::HalodiControllerConfigurationLoader(std::st
             javaHome = plugin["javaHome"];
             mainClass = plugin["mainClass"];
 
-            std::cout << name << std::endl;
-            std::cout << javaHome << std::endl;
-            std::cout << mainClass << std::endl;
-
             for(auto& classPathElement : plugin["classPath"])
             {
                 classPath.push_back(classPathElement);
@@ -74,10 +67,8 @@ HalodiControllerConfigurationLoader::HalodiControllerConfigurationLoader(std::st
     }
 
     if(!found)
-
     {
-        std::cerr << "Cannot find controller named " << controllerName_ << std::endl;
-        throw new std::runtime_error("Controller not found");
+        throw std::runtime_error("Cannot find controller named " + controllerName_);
     }
 
 

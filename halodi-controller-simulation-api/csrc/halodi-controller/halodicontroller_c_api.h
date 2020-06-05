@@ -9,11 +9,13 @@
 
 extern "C"
 {
-    DLL_EXPORT void halodi_controller_redirect_output(char* stdoutFilename, char* stderrFilename);
+    typedef void (*halodi_controller_c_output_handler_delegate)(bool, char*);
 
     DLL_EXPORT bool halodi_controller_create(char* controllerName_, char *workingDirectory_);
 
     DLL_EXPORT bool halodi_controller_created();
+
+    DLL_EXPORT void halodi_controller_set_output_delegate(halodi_controller_c_output_handler_delegate delegate);
 
 
     DLL_EXPORT double* halodi_controller_add_joint(char* name);
@@ -39,5 +41,6 @@ extern "C"
 
     DLL_EXPORT void halodi_controller_destroy();
 
+    DLL_EXPORT char* halodi_controller_get_last_error();
     DLL_EXPORT void halodi_controller_free_string(char* str);
 }

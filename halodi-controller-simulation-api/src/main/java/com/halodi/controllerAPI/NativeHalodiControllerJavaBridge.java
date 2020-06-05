@@ -1,10 +1,13 @@
 package com.halodi.controllerAPI;
 
+import java.io.PrintStream;
 import java.nio.ByteBuffer;
+import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.halodi.controllerAPI.util.CallbackPrintStream;
 import com.halodi.controllerAPI.wholeRobot.EffortJointHandle;
 import com.halodi.controllerAPI.wholeRobot.EffortJointHandleImpl;
 import com.halodi.controllerAPI.wholeRobot.ForceTorqueSensorHandle;
@@ -19,10 +22,59 @@ public abstract class NativeHalodiControllerJavaBridge implements HalodiControll
    private boolean initialized;
    private String controllerArguments;
    
+   private Object nativeLock = new Object();
+   private long nativePtr = 0;
+   
    private final HashMap<String, EffortJointHandleImpl> joints = new HashMap<>();
    private final HashMap<String, IMUHandleImpl> imus = new HashMap<>();
    private final HashMap<String, ForceTorqueSensorHandleImpl> forceTorqueSensors = new HashMap<>();
    private final HashMap<String, SharedBufferImpl> sharedBuffers = new HashMap<>();
+   
+   
+   private static native void outputHandler(long ptr, boolean stderr, String message);
+   
+   void redirectOutput(long ptr)
+   {
+      synchronized (nativeLock)
+      {
+         this.nativePtr = ptr;
+      }
+      
+      System.setOut(new CallbackPrintStream()
+      {
+         
+         @Override
+         public void outputLine(String message)
+         {
+            log(false, message);
+         }
+      });
+      
+      System.setErr(new CallbackPrintStream()
+      {
+         
+         @Override
+         public void outputLine(String message)
+         {
+            log(true, message);
+         }
+      });
+      
+      System.out.println("Calling from Java");
+      System.err.println("STD Err from java");
+   }
+   
+   public void log(boolean stderr, String out)
+   {
+      synchronized(nativeLock)
+      {
+         if(nativePtr != 0)
+         {
+            outputHandler(nativePtr, stderr, out);
+         }
+      }
+   }
+   
 
    /**
     * Create a new JointStateHandle. Called from native layer
@@ -197,6 +249,11 @@ public abstract class NativeHalodiControllerJavaBridge implements HalodiControll
       {
          t.printStackTrace();
       } 
+      
+      synchronized(nativeLock)
+      {
+         nativePtr = 0;
+      }
    }
    
    String callControllerFromNative(String request, String arguments)

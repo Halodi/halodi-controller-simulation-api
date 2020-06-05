@@ -3,15 +3,22 @@
 #include <jni.h>
 
 
-#include <filesystem>
+#ifdef __cpp_lib_filesystem
+    #include <filesystem>
+    namespace fs = std::filesystem;
+#else
+    #include <experimental/filesystem>
+    namespace fs = std::experimental::filesystem;
+#endif
+
 
 
 namespace  halodi_platform {
-    std::filesystem::path getLocalAppData();
+    fs::path getLocalAppData();
 
 
     typedef jint(JNICALL *CreateJavaVM)(JavaVM**, void**, void*);
-    bool loadJNIFunctions(std::filesystem::path javaHome, CreateJavaVM* createJavaVM);
+    void loadJNIFunctions(fs::path javaHome, CreateJavaVM* createJavaVM);
 
 }
 

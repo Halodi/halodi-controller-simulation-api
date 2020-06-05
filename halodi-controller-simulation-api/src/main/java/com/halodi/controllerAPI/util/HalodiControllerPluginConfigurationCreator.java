@@ -31,7 +31,6 @@ public class HalodiControllerPluginConfigurationCreator
 		try 
 		{
 			file = new File(url.toURI()).getAbsolutePath();
-			System.out.println(file);
 		} 
 		catch (URISyntaxException e) 
 		{

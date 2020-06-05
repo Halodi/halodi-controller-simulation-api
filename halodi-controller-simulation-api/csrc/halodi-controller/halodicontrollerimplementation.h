@@ -15,6 +15,8 @@ class HalodiControllerImplementation : public HalodiController
 public:
     HalodiControllerImplementation(std::string controllerName_, std::string working_directory_);
 
+    static void standardOuputCallback(JNIEnv* env, jobject caller, jlong ptr, jboolean stderr, jstring data);
+
     std::shared_ptr<JointHandle> addJoint(std::string name);
     std::shared_ptr<IMUHandle> addIMU(std::string parentLink, std::string name);
     std::shared_ptr<ForceTorqueSensorHandle> addForceTorqueSensor(std::string parentLink, std::string name);
@@ -34,6 +36,8 @@ public:
 
     std::string callController(std::string request, std::string arguments);
     std::shared_ptr<SharedBuffer> createSharedBuffer(std::string name, int32_t size);
+
+    void setOutputHandler(std::function<void(bool, std::string)> handler);
 
     virtual ~HalodiControllerImplementation();
 
@@ -56,6 +60,11 @@ private:
     std::shared_ptr<JavaMethod> jGetControllerDescription;
     std::shared_ptr<JavaMethod> jCallController;
     std::shared_ptr<JavaMethod> jCreateSharedBuffer;
+
+
+    std::function<void(bool, std::string)> outputHandler;
+
+    void standardOutputHandler(bool stdErr, std::string message);
 };
 
 

@@ -5,23 +5,21 @@
 #include <algorithm>
 #include <vector>
 
-#include <filesystem>
-
 #include <stdexcept>
 
 #include "../platform/platform.h"
 
-void JavaVirtualMachine::displayJNIError(std::string prefix, int error)
+std::string JavaVirtualMachine::getJNIError(int error)
 {
     switch(error)
     {
-        case JNI_OK: std::cout << prefix << ": success" << std::endl; return;
-        case JNI_ERR: std::cerr << prefix << ": unknown error" << std::endl; return;
-        case JNI_EDETACHED: std::cerr << prefix << ": thread detached from the VM" << std::endl; return;
-        case JNI_EVERSION : std::cerr << prefix << ": JNI version error" << std::endl; return;
-        case JNI_ENOMEM : std::cerr << prefix << ": not enough memory" << std::endl; return;
-        case JNI_EEXIST : std::cerr << prefix << ": VM already created" << std::endl; return;
-        case JNI_EINVAL : std::cerr << prefix << ": invalid arguments" << std::endl; return;
+        case JNI_OK: return "success";
+        case JNI_ERR: return "unknown error";
+        case JNI_EDETACHED: return "thread detached from the VM";
+        case JNI_EVERSION : return "JNI version error";
+        case JNI_ENOMEM : return "not enough memory";
+        case JNI_EEXIST : return "VM already created";
+        case JNI_EINVAL : return "invalid arguments";
     }
 }
 
@@ -101,11 +99,9 @@ JavaVirtualMachine::JavaVirtualMachine(std::string javaHome, std::string working
 
    halodi_platform::CreateJavaVM createJavaVM = nullptr;
 
-   std::filesystem::path javaPath(javaHome);
+   fs::path javaPath(javaHome);
 
-    if (!halodi_platform::loadJNIFunctions(javaPath, &createJavaVM)) {
-        throw std::runtime_error("Error: failed to load VM runtime library!");
-    }
+    halodi_platform::loadJNIFunctions(javaPath, &createJavaVM);
 
     JavaVMOption* javaOptions = new JavaVMOption[options.size()];
 
@@ -125,15 +121,15 @@ JavaVirtualMachine::JavaVirtualMachine(std::string javaHome, std::string working
 
 
 
-    std::filesystem::path currentDirectory = std::filesystem::current_path();
+    fs::path currentDirectory = fs::current_path();
 
     if (workingDirectory != "." && workingDirectory != "")
     {
-        std::filesystem::path workingPath(workingDirectory);
+        fs::path workingPath(workingDirectory);
 
         try
         {
-            std::filesystem::current_path(workingPath);
+            fs::current_path(workingPath);
         }
         catch (...)
         {
@@ -144,20 +140,19 @@ JavaVirtualMachine::JavaVirtualMachine(std::string javaHome, std::string working
 
     }
 
-    std::cout << "Starting Java VM from path  " << std::filesystem::current_path() << std::endl;
+    std::cout << "Starting Java VM from path  " << fs::current_path() << std::endl;
 
 
 
 
     JNIEnv* env;
     jint res = createJavaVM(&jvm, (void**) &env, &vmArguments);
-    displayJNIError("Started Java VM", res);
 
     if(workingDirectory != ".")
     {
         try
         {
-            std::filesystem::current_path(currentDirectory);
+            fs::current_path(currentDirectory);
         }
         catch (...)
         {
@@ -168,7 +163,7 @@ JavaVirtualMachine::JavaVirtualMachine(std::string javaHome, std::string working
     if(res != JNI_OK)
     {
         jvm = nullptr;
-        throw std::runtime_error("JVM failed to start. Error code: " + res);
+        throw std::runtime_error("JVM failed to start. Error: " + getJNIError(res));
     }
 
 
@@ -260,7 +255,7 @@ void JavaVirtualMachine::registerNativeMethod(std::string className, std::string
     int res = env->RegisterNatives(cls, method, 1);
     if(res != JNI_OK)
     {
-        throw std::runtime_error("Cannot register native method");
+        throw std::runtime_error("Cannot register native method" + std::to_string(res));
     }
 }
 
@@ -290,11 +285,14 @@ JavaVirtualMachine::~JavaVirtualMachine()
     }
 
     jint res = jvm->DestroyJavaVM();
-    displayJNIError("Stopping Java VM", res);
 
     if(res == JNI_OK)
     {
         jvm = nullptr;
+    }
+    else
+    {
+        std::cerr << "Error stopping JVM: " << getJNIError(res) << std::endl;
     }
 
 
@@ -389,16 +387,20 @@ std::string JavaMethod::callStringMethod(std::shared_ptr<JavaObject> obj, ...)
             throw std::runtime_error(std::string(__FUNCTION__) + ": String is null");
         }
 
-        const char* cstr = env->GetStringUTFChars(javaString, 0);
-        std::string cppStr = std::string(cstr);
-        env->ReleaseStringUTFChars(javaString, cstr);
-
-        return cppStr;
+        return launcher->toCppString(env, javaString);
     }
     else
     {
         throw std::runtime_error(std::string(__FUNCTION__) + ": Unexpected object type");
     }
+}
+
+std::string JavaVirtualMachine::toCppString(JNIEnv* env, jstring javaString)
+{
+    const char* cstr = env->GetStringUTFChars(javaString, 0);
+    std::string cppStr = std::string(cstr);
+    env->ReleaseStringUTFChars(javaString, cstr);
+    return cppStr;
 }
 
 jboolean JavaMethod::callBooleanMethod(std::shared_ptr<JavaObject> obj, ...)

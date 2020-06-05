@@ -2,6 +2,7 @@
 
 #include <string>
 #include <memory>
+#include <functional>
 
 #ifdef WIN32
 #define DLL_EXPORT __declspec(dllexport)
@@ -276,6 +277,16 @@ public:
      * @return Pointer to shared buffer
      */
     virtual std::shared_ptr<SharedBuffer> createSharedBuffer(std::string name, int32_t size)  = 0;
+
+
+    /**
+     * @brief setOutputHandler
+     *
+     * Set the output handler to the function pointer
+     *
+     * @param OutputHandlerFunction
+     */
+    virtual void setOutputHandler(std::function<void(bool, std::string)> handler) = 0;
 
 };
 

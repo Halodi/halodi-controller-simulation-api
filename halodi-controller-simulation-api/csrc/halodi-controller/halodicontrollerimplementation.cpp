@@ -11,6 +11,12 @@
 namespace  halodi_controller
 {
 
+void HalodiControllerImplementation::standardOuputCallback(JNIEnv *env, jobject caller, jlong ptr, jboolean stderr, jstring message)
+{
+    HalodiControllerImplementation* impl = (HalodiControllerImplementation*) ptr;
+    impl->standardOutputHandler(false, JavaVirtualMachine::toCppString(env, message));
+}
+
 HalodiControllerImplementation::HalodiControllerImplementation(std::string controllerName_, std::string working_directory_) :
     configurationLoader(controllerName_)
 {
@@ -19,8 +25,18 @@ HalodiControllerImplementation::HalodiControllerImplementation(std::string contr
 
 
     std::string mainClass = configurationLoader.mainClass;
+
+
+    vm->registerNativeMethod("com.halodi.controllerAPI.NativeHalodiControllerJavaBridge", "outputHandler", "(JZLjava/lang/String;)V", reinterpret_cast<void*>(&HalodiControllerImplementation::standardOuputCallback));
+
     std::shared_ptr<JavaMethod> ctor = vm->getJavaMethod(mainClass, "<init>", "()V");
     bridge = ctor->createObject(jargument);
+
+
+    std::shared_ptr<JavaMethod> jRedirectOutput = vm->getJavaMethod(mainClass, "redirectOutput", "(J)V");
+    jRedirectOutput->callVoidMethod(bridge, (jlong) this);
+
+
 
 
     jAddJoint = vm->getJavaMethod(mainClass, "createEffortJointHandle", "(Ljava/lang/String;)Ljava/nio/ByteBuffer;");
@@ -39,6 +55,8 @@ HalodiControllerImplementation::HalodiControllerImplementation(std::string contr
 
 
 }
+
+
 
 std::shared_ptr<JointHandle> HalodiControllerImplementation::addJoint(std::string name)
 {
@@ -123,10 +141,34 @@ std::shared_ptr<SharedBuffer> HalodiControllerImplementation::createSharedBuffer
     return std::make_shared<SharedBufferImplementation>(size, buffer);
 }
 
+void HalodiControllerImplementation::setOutputHandler(std::function<void (bool, std::string)> handler)
+{
+    this->outputHandler = handler;
+}
+
 HalodiControllerImplementation::~HalodiControllerImplementation()
 {
     vm->attachCurrentThread();
     jShutdown->callVoidMethod(bridge);
+}
+
+void HalodiControllerImplementation::standardOutputHandler(bool stdErr, std::string message)
+{
+    if(outputHandler)
+    {
+        outputHandler(stdErr, message);
+    }
+    else
+    {
+        if(stdErr)
+        {
+            std::cerr << "[Controller] " << message << std::endl;
+        }
+        else
+        {
+            std::cout << "[Controller] " << message << std::endl;
+        }
+    }
 }
 
 }
