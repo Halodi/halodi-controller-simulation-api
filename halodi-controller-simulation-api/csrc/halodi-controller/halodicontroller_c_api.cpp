@@ -8,8 +8,11 @@
 #include <iostream>
 #include <mutex>
 #include <queue>
+#include <nlohmann/json.hpp>
 
 using namespace halodi_controller;
+
+using json = nlohmann::json;
 
 
 std::shared_ptr<HalodiController> halodi_controller_ptr;
@@ -36,8 +39,14 @@ void halodi_controller_c_output_handler_callback(bool standardError, std::string
 {
     if(halodi_controller_console_enable_queue)
     {
+        json msg;
+        msg["level"] = standardError ? "ERROR" : "INFO";
+        msg["message"] = message;
+
+
         const std::lock_guard<std::mutex> lock(halodi_controller_sync);
-        halodi_controller_console_queue.push(message);
+        halodi_controller_console_queue.push(msg.dump());
+
     }
     else
     {
@@ -54,10 +63,6 @@ void halodi_controller_c_output_handler_callback(bool standardError, std::string
 
 bool halodi_controller_create(char* controllerName_, char *workingDirectory_)
 {
-
-    freopen("stdout.txt", "a", stdout);
-    freopen("stderr.txt", "a", stderr);
-
     if(halodi_controller_ptr)
     {
         halodi_controller_last_error = "Controller already created";

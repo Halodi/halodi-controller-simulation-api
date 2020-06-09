@@ -2,7 +2,6 @@ package com.halodi.controllerAPI.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.util.regex.Pattern;
 
 /**
  * 
@@ -16,7 +15,6 @@ import java.util.regex.Pattern;
  */
 public abstract class CallbackPrintStream extends PrintStream
 {   
-   private final static Pattern newlinePattern = Pattern.compile("\\r?\\n");
 
    
    public CallbackPrintStream()
@@ -35,11 +33,7 @@ public abstract class CallbackPrintStream extends PrintStream
       {
          if(count > 0 && buf[count -1] == '\n')
          {
-            String[] messages = newlinePattern.split(toString());
-            for(String message : messages)
-            {
-               callbackPrintStream.outputLine(message);
-            }
+            callbackPrintStream.outputLine(toString());
             reset();
          }
       }
