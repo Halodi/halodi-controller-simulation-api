@@ -14,7 +14,7 @@ namespace  halodi_controller
 void HalodiControllerImplementation::standardOuputCallback(JNIEnv *env, jobject caller, jlong ptr, jboolean standardError, jstring message)
 {
     HalodiControllerImplementation* impl = (HalodiControllerImplementation*) ptr;
-    impl->standardOutputHandler(false, JavaVirtualMachine::toCppString(env, message));
+    impl->standardOutputHandler(standardError, JavaVirtualMachine::toCppString(env, message));
 }
 
 HalodiControllerImplementation::HalodiControllerImplementation(std::string controllerName_, std::string working_directory_) :
