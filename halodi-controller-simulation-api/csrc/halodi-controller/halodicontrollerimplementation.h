@@ -15,7 +15,7 @@ class HalodiControllerImplementation : public HalodiController
 public:
     HalodiControllerImplementation(std::string controllerName_, std::string working_directory_);
 
-    static void standardOuputCallback(JNIEnv* env, jobject caller, jlong ptr, jboolean stderr, jstring data);
+    static void standardOuputCallback(JNIEnv* env, jobject caller, jlong ptr, jboolean standardError, jstring data);
 
     std::shared_ptr<JointHandle> addJoint(std::string name);
     std::shared_ptr<IMUHandle> addIMU(std::string parentLink, std::string name);
