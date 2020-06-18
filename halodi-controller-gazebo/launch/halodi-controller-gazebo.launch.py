@@ -3,6 +3,7 @@ import os
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.actions import IncludeLaunchDescription
+from launch.actions import SetEnvironmentVariable
 from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
@@ -43,7 +44,13 @@ def generate_launch_description():
         
         DeclareLaunchArgument('factory', default_value='true',
                               description='Set "false" not to load "libgazebo_ros_factory.so"'),
+
+
+        DeclareLaunchArgument('trajectory-api', default_value='true',
+                                  description='Set "false" to disable trajectory api and use realtime api'),
         
+        SetEnvironmentVariable('HALODI_TRAJECTORY_API', LaunchConfiguration('trajectory-api')),
+
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(os.path.join(gazebo_package_prefix, 'launch', 'gzserver.launch.py'))
         ),

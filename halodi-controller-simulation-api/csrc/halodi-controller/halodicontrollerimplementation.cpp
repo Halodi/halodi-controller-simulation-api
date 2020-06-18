@@ -162,11 +162,11 @@ void HalodiControllerImplementation::standardOutputHandler(bool stdErr, std::str
     {
         if(stdErr)
         {
-            std::cerr << "[Controller] " << message << std::endl;
+            std::cerr << "[Controller] " << message;
         }
         else
         {
-            std::cout << "[Controller] " << message << std::endl;
+            std::cout << "[Controller] " << message;
         }
     }
 }

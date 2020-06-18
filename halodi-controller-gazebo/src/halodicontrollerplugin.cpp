@@ -132,6 +132,21 @@ public:
         {
 
             std::string controllerArguments = "--pubsub FAST_RTPS_SYSTEM_LIBRARY";
+
+            if(const char* halodi_trajectory_api = std::getenv("HALODI_TRAJECTORY_API"))
+            {
+                bool enableApi = std::string(halodi_trajectory_api) == "true";
+                if(!enableApi)
+                {
+                    std::cout << "Trajectory API: Disabled" << std::endl;
+                    controllerArguments += " --no-trajectory";
+                }
+                else
+                {
+                    std::cout << "Trajectory API: Enabled" << std::endl;
+                }
+            }
+
             controller = HalodiController::create("NativePluginEveSimulation");
 
 
@@ -191,10 +206,6 @@ public:
 
     void OnPause()
     {
-        controller->attachCurrentThread();
-        controller->callController("setPaused", "true");
-        controller->deattachCurrentThread();
-
         reattachController = true;
     }
 
@@ -204,7 +215,6 @@ public:
         {
             // Make sure this thread is attached to the controller
             controller->attachCurrentThread();
-            controller->callController("setPaused", "false");
             reattachController = false;
         }
 
