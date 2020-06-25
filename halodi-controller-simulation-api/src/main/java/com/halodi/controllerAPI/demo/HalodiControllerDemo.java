@@ -38,12 +38,6 @@ public class HalodiControllerDemo extends NativeHalodiControllerJavaBridge
    }
 
    @Override
-   public double getInitialJointAngle(String name)
-   {
-      return 0;
-   }
-
-   @Override
    public void shutdown()
    {
       System.out.println("Shutting down controller");

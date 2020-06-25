@@ -41,14 +41,6 @@ public interface HalodiControllerJavaBridge
    void shutdown();
    
    /**
-    * Get the initial joint angle at startup for a named joint
-    * @param name Joint name
-    * @return Initial joint angle for joint
-    */
-   double getInitialJointAngle(String name);
-   
-   
-   /**
     * Execute a function on the controller.  
     * 
     * This implements a simple RPC style interface to communicate between the simulator and controller. 

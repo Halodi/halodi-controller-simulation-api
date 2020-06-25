@@ -11,7 +11,7 @@ public class EffortJointHandleImpl implements EffortJointHandle
    private final ByteBuffer buffer;
    private final DoubleBuffer doubleBuffer;
 
-   public EffortJointHandleImpl(String jointName, double initialAngle)
+   public EffortJointHandleImpl(String jointName)
    {
       this.jointName = jointName;
       this.buffer = ByteBuffer.allocateDirect(6 * 8);
@@ -19,7 +19,6 @@ public class EffortJointHandleImpl implements EffortJointHandle
 
       this.doubleBuffer = this.buffer.asDoubleBuffer();
       
-      doubleBuffer.put(5, initialAngle);
 
    }
 
@@ -62,6 +61,12 @@ public class EffortJointHandleImpl implements EffortJointHandle
    public ByteBuffer getBuffer()
    {
       return buffer;
+   }
+
+   @Override
+   public void setInitialAngle(double initialAngle)
+   {
+      doubleBuffer.put(5, initialAngle);
    }
 
    

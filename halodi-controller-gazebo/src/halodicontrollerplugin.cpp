@@ -24,6 +24,7 @@ class GazeboHandle
 public:
     virtual void read() = 0;
     virtual void write() = 0;
+    virtual void initialize() = 0;
 };
 
 class GazeboJointHandle : public GazeboHandle
@@ -47,6 +48,12 @@ public:
     {
         gazeboJoint->SetForce(0, controllerJoint->getDesiredEffort());
         gazeboJoint->SetDamping(0, controllerJoint->getDampingScale());
+    }
+
+    void initialize()
+    {
+        std::cout << "Setting " << gazeboJoint->GetName() << " to  " << controllerJoint->getInitialAngle() << std::endl;
+        gazeboJoint->SetPosition(0, controllerJoint->getInitialAngle());
     }
 
 private:
@@ -82,6 +89,10 @@ public:
     {
     }
 
+    void initialize()
+    {
+    }
+
 private:
     std::shared_ptr<IMUHandle> controllerIMU;
     sensors::ImuSensorPtr gazeboIMU;
@@ -108,6 +119,10 @@ public:
 
     }
     void write()
+    {
+    }
+
+    void initialize()
     {
     }
 
@@ -175,6 +190,11 @@ public:
 
             if(controller->initialize(controllerArguments))
             {
+                for(auto updatable : updateables)
+                {
+//                    updatable->initialize();
+                }
+
                 if(controller->start())
                 {
 
