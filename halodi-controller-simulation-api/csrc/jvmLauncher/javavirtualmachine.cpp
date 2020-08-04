@@ -210,7 +210,10 @@ std::shared_ptr<StaticJavaMethod> JavaVirtualMachine::getStaticJavaMethod(std::s
         throw std::runtime_error("Cannot find method " + methodName + signature);
     }
 
-    return std::make_shared<StaticJavaMethod>(shared_from_this(), (jclass) env->NewGlobalRef(cls), mid);
+    jclass globalClassRef = (jclass) env->NewGlobalRef(cls);
+    env->DeleteLocalRef(cls);
+
+    return std::make_shared<StaticJavaMethod>(shared_from_this(), globalClassRef, mid);
 }
 
 std::shared_ptr<JavaString> JavaVirtualMachine::createJavaString(std::string stdStr)
@@ -233,8 +236,10 @@ std::shared_ptr<JavaMethod> JavaVirtualMachine::getJavaMethod(std::string classN
         throw std::runtime_error("Cannot find method " + methodName + signature);
     }
 
+    jclass globalClassRef = (jclass) env->NewGlobalRef(cls);
+    env->DeleteLocalRef(cls);
 
-    return std::make_shared<JavaMethod>(shared_from_this(), (jclass) env->NewGlobalRef(cls), mid);
+    return std::make_shared<JavaMethod>(shared_from_this(), globalClassRef, mid);
 }
 
 void JavaVirtualMachine::registerNativeMethod(std::string className, std::string methodName, std::string signature, void *functionPointer)
@@ -362,7 +367,10 @@ void* JavaMethod::callBytebufferMethod(std::shared_ptr<JavaObject> obj, int mini
             throw std::runtime_error(std::string(__FUNCTION__) + ": Bytebuffer is smaller than minimumCapacity");
         }
 
-        return env->GetDirectBufferAddress(byteBuffer);
+        void* result = env->GetDirectBufferAddress(byteBuffer);
+        env->DeleteLocalRef(byteBuffer);
+
+        return result;
 
     }
     else
@@ -459,7 +467,11 @@ std::shared_ptr<JavaObject> JavaMethod::createObject(jargument_t arg, ...)
     va_end(arglist);
     if(newObject)
     {
-        return std::make_shared<JavaObject>(launcher, env->NewGlobalRef(newObject));
+        jobject globalObject = env->NewGlobalRef(newObject);
+        // Remove local reference to have only the global reference left
+        env->DeleteLocalRef(newObject);
+
+        return std::make_shared<JavaObject>(launcher, globalObject);
     }
     else
     {
@@ -532,7 +544,9 @@ JavaString::JavaString(std::shared_ptr<JavaVirtualMachine> launcher_, std::strin
     JNIEnv* env = launcher->getEnv();
     if(env)
     {
-        jdata = (jstring)env->NewGlobalRef(env->NewStringUTF(string_.c_str()));
+        jstring localData = env->NewStringUTF(string_.c_str());
+        jdata = (jstring)env->NewGlobalRef(localData);
+        env->DeleteLocalRef(localData);
     }
     else
     {
