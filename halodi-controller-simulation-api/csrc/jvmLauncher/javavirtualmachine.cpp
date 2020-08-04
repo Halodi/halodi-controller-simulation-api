@@ -387,7 +387,11 @@ std::string JavaMethod::callStringMethod(std::shared_ptr<JavaObject> obj, ...)
             throw std::runtime_error(std::string(__FUNCTION__) + ": String is null");
         }
 
-        return launcher->toCppString(env, javaString);
+        std::string result = launcher->toCppString(env, javaString);
+
+        // Make sure to delete the reference to the string otherwise there is a large memory leak on the Java side.
+        env->DeleteLocalRef(javaString);
+        return result;
     }
     else
     {
