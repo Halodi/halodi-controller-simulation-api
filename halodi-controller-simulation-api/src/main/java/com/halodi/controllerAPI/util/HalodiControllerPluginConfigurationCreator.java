@@ -1,20 +1,18 @@
 package com.halodi.controllerAPI.util;
 
 import java.io.File;
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 import com.halodi.controllerAPI.NativeHalodiControllerJavaBridge;
 import com.halodi.controllerAPI.demo.HalodiControllerDemo;
 
 public class HalodiControllerPluginConfigurationCreator
 {
-   public static HalodiControllerPluginConfiguration create(Class<? extends NativeHalodiControllerJavaBridge> pluginClass)
+   public static HalodiControllerPluginConfiguration create(Class<? extends NativeHalodiControllerJavaBridge> pluginClass, String... vmArguments)
    {
       HalodiControllerPluginConfiguration config = new HalodiControllerPluginConfiguration();
       config.name = pluginClass.getSimpleName();
@@ -51,10 +49,11 @@ public class HalodiControllerPluginConfigurationCreator
 
       config.javaHome = System.getProperty("java.home");
 
-      RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
-      List<String> arguments = runtimeMxBean.getInputArguments();
 
-      config.vmArgs.addAll(arguments);
+      if(vmArguments != null)
+      {
+         config.vmArgs.addAll(Arrays.asList(vmArguments));
+      }
 
       config.mainClass = pluginClass.getCanonicalName();
 

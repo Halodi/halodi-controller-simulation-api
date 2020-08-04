@@ -66,7 +66,7 @@ public class HalodiControllerPluginConfigurationInstaller
       return Files.createDirectories(path);
    }
    
-   public static void install(Class<? extends NativeHalodiControllerJavaBridge> pluginClass) throws IOException
+   public static void install(Class<? extends NativeHalodiControllerJavaBridge> pluginClass, String... vmArguments) throws IOException
    {
       ObjectMapper mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
       Path config = getPersistantDataPath().resolve(configFile);
@@ -78,7 +78,7 @@ public class HalodiControllerPluginConfigurationInstaller
       }
       
       
-      HalodiControllerPluginConfiguration halodiControllerPluginConfiguration = HalodiControllerPluginConfigurationCreator.create(pluginClass);
+      HalodiControllerPluginConfiguration halodiControllerPluginConfiguration = HalodiControllerPluginConfigurationCreator.create(pluginClass, vmArguments);
       list.plugins.remove(halodiControllerPluginConfiguration);
       list.plugins.add(halodiControllerPluginConfiguration);
       
