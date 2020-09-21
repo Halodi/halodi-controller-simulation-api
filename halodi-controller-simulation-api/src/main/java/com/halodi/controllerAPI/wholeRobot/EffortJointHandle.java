@@ -9,4 +9,8 @@ public interface EffortJointHandle
    public void setDesiredEffort(double desiredEffort);
    public void setDampingScale(double dampingScale);
    public void setInitialAngle(double initialAngle);
+   
+   public double getDesiredEffort();
+   public double getDampingScale();
+   public double getInitialAngle();
 }

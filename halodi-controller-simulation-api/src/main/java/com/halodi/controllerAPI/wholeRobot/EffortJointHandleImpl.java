@@ -69,5 +69,23 @@ public class EffortJointHandleImpl implements EffortJointHandle
       doubleBuffer.put(5, initialAngle);
    }
 
+   @Override
+   public double getDesiredEffort()
+   {
+      return doubleBuffer.get(3);
+   }
+
+   @Override
+   public double getDampingScale()
+   {
+      return doubleBuffer.get(4);
+   }
+
+   @Override
+   public double getInitialAngle()
+   {
+      return doubleBuffer.get(5);
+   }
+
    
 }
