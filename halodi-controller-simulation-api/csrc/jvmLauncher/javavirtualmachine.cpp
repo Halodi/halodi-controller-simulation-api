@@ -20,6 +20,7 @@ std::string JavaVirtualMachine::getJNIError(int error)
         case JNI_ENOMEM : return "not enough memory";
         case JNI_EEXIST : return "VM already created";
         case JNI_EINVAL : return "invalid arguments";
+        default: return "undefined error";
     }
 }
 
@@ -105,8 +106,8 @@ JavaVirtualMachine::JavaVirtualMachine(std::string javaHome, std::string working
 
     JavaVMOption* javaOptions = new JavaVMOption[options.size()];
 
-    int argc = 0;
-    for(uint32_t i = 0; i < options.size(); i++)
+    size_t argc = 0;
+    for(size_t i = 0; i < options.size(); i++)
     {
         if(options.at(i) != "-")
         {

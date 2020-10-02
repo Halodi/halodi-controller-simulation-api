@@ -13,7 +13,7 @@
 
 #include <filesystem>
 #include "platform.h"
-#include <sstream>>
+#include <sstream>
 
 namespace  halodi_platform {
 
