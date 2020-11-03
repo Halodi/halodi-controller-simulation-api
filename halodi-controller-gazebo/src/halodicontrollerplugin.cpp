@@ -248,7 +248,7 @@ public:
 
 
         long long rawTime = ((long long)common::Time::nsInSec) * ((long long)time.sec) + ((long long) time.nsec);
-        long long dt = lastUpdateTime - rawTime;
+        long long dt = rawTime - lastUpdateTime;
 
 
 
