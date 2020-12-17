@@ -162,6 +162,14 @@ public:
                 }
             }
 
+
+
+            if(const char* domain_id = std::getenv("ROS_DOMAIN_ID"))
+            {
+                controllerArguments += " -d ";
+                controllerArguments += domain_id;
+            }
+
             controller = HalodiController::create("NativePluginEveSimulation");
 
 
