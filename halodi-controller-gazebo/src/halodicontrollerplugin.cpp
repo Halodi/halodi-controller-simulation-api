@@ -146,7 +146,7 @@ public:
         try
         {
 
-            std::string controllerArguments = "--pubsub FAST_RTPS_SYSTEM_LIBRARY";
+            std::string controllerArguments = "--pubsub FAST_RTPS";
 
             if(const char* halodi_trajectory_api = std::getenv("HALODI_TRAJECTORY_API"))
             {
