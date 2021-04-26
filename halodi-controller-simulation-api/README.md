@@ -93,3 +93,8 @@ cd buildc
 "C:\Program Files\CMake\bin\cmake.exe" --build . --config Release
 ```
 
+# Publishing
+To publish the maven package from command line:
+```
+ARTIFACTS_USERNAME=[username] ARTIFACTS_PASSWORD=[password] gradle publish
+```
