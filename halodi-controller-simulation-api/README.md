@@ -94,7 +94,12 @@ cd buildc
 ```
 
 # Publishing
-To publish the maven package from command line:
+To upload snapshot to artifacts.halodi.com:
 ```
-ARTIFACTS_USERNAME=[username] ARTIFACTS_PASSWORD=[password] gradle publish
+ARTIFACT_USERNAME=[username] ARTIFACT_PASSWORD=[password] ARTIFACT_VERSION=[version] gradle publish
+```
+
+To upload release to artifacts.halodi.com:
+```
+ARTIFACT_USERNAME=[username] ARTIFACT_PASSWORD=[password] ARTIFACT_VERSION=[version] gradle publish -PenvironmentName=release
 ```
