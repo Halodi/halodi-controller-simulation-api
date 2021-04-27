@@ -93,3 +93,13 @@ cd buildc
 "C:\Program Files\CMake\bin\cmake.exe" --build . --config Release
 ```
 
+# Publishing
+To upload snapshot to artifacts.halodi.com:
+```
+ARTIFACT_USERNAME=[username] ARTIFACT_PASSWORD=[password] ARTIFACT_VERSION=[version] gradle publish
+```
+
+To upload release to artifacts.halodi.com:
+```
+ARTIFACT_USERNAME=[username] ARTIFACT_PASSWORD=[password] ARTIFACT_VERSION=[version] gradle publish -PenvironmentName=release
+```
