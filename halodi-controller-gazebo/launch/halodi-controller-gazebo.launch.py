@@ -51,6 +51,10 @@ def generate_launch_description():
         
         SetEnvironmentVariable('HALODI_TRAJECTORY_API', LaunchConfiguration('trajectory-api')),
         
+
+        DeclareLaunchArgument('variable-server', default_value='false',
+                                 description='Set "true" to enable the variable server and use SCSVisualizer to tune variables'),
+
         SetEnvironmentVariable('SCS_VARIABLE_SERVER', LaunchConfiguration('variable-server')),
 
 
