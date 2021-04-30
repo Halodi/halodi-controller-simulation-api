@@ -50,6 +50,9 @@ def generate_launch_description():
                                   description='Set "false" to disable trajectory api and use realtime api'),
         
         SetEnvironmentVariable('HALODI_TRAJECTORY_API', LaunchConfiguration('trajectory-api')),
+        
+        SetEnvironmentVariable('SCS_VARIABLE_SERVER', LaunchConfiguration('variable-server')),
+
 
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(os.path.join(gazebo_package_prefix, 'launch', 'gzserver.launch.py'))

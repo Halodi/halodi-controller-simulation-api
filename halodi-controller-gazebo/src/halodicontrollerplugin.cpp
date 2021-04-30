@@ -162,6 +162,15 @@ public:
                 }
             }
 
+	    if(const char* varServer = std::getenv("SCS_VARIABLE_SERVER"))
+	    {
+		    
+		if(std::string(varServer) == "true")
+		{
+			std::cout << "Enabling YoVariable server" << std::endl;
+			controllerArguments += " --variableserver";
+		}
+	    }
 
 
             if(const char* domain_id = std::getenv("ROS_DOMAIN_ID"))
