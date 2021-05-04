@@ -1,0 +1,16 @@
+build:
+  stage: test
+  image: gradle:6.8.3-jdk8
+  script:
+    - gradle build
+  except:
+    - tags
+
+include:
+  - project: 'halodi/gitlab-ci-cd/templates/publish-with-gradle'
+    ref: 0.0.1-alpha.5
+    file: 'publish-with-gradle-vault1.7.1-gradle6.8.3-jdk8.gitlab-ci'
+  
+publish-with-gradle:
+  variables:
+    PROJECT_PATH: halodi-controller-simulation-api
