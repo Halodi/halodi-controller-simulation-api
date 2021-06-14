@@ -1,16 +1,36 @@
-build:
+test:
   stage: test
   image: gradle:6.8.3-jdk8
+  before_script:
+    - export GRADLE_USER_HOME=`pwd`/.gradle
   script:
     - gradle build
   except:
     - tags
+  cache:
+    paths:
+      - .gradle/wrapper
+      - .gradle/caches
+  only:
+    - merge_requests
 
 include:
-  - project: 'halodi/gitlab-ci-cd/templates/publish-with-gradle'
-    ref: 0.0.1-alpha.5
+  - project: 'halodi/tooling/gitlab-ci-cd/templates/publish-with-gradle'
+    ref: 0.0.9
     file: 'publish-with-gradle-vault1.7.1-gradle6.8.3-jdk8.gitlab-ci.yml'
-  
+
 publish-with-gradle:
   variables:
-    PROJECT_PATH: halodi-controller-simulation-api
+    PROJECT_PATH: .
+    VAULT_ADDRESS: $VAULT_ADDR
+    OPEN_SOURCE: "true"
+
+move-to-staging:
+  variables:
+    VAULT_ADDRESS: $VAULT_ADDR
+    OPEN_SOURCE: "true"
+
+move-to-production:
+  variables:
+    VAULT_ADDRESS: $VAULT_ADDR
+    OPEN_SOURCE: "true"
