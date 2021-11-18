@@ -25,11 +25,17 @@ install(
   DESTINATION include
 )
 
+install(
+  TARGETS halodi-controller-api jvmLauncher platform
+  EXPORT halodi-controller-api
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin)
 
 if(ament_cmake_FOUND)
     
     ament_export_include_directories(include)
     ament_export_libraries(halodi-controller-api)
+    ament_export_targets(halodi-controller-api HAS_LIBRARY_TARGET)
 
     ament_package()
 endif()
