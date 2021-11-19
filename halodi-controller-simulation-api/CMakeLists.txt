@@ -19,6 +19,7 @@ include(FindOrDownloadJDK)
 include_directories(include ${JNI_INCLUDE_DIRS})
 
 add_subdirectory(csrc)
+add_subdirectory(pythonsrc)
 
 install(
   DIRECTORY include/
@@ -28,6 +29,10 @@ install(
 install(
   TARGETS halodi-controller-api jvmLauncher platform
   EXPORT halodi-controller-api
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin)
+
+install(TARGETS halodi_controller_python
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
 
