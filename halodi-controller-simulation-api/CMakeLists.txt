@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 project(halodi-controller-simulation-api)
 
+option(BUILD_PYTHON_BINDINGS "Build the Python bindings for the controller" ON)
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 
@@ -19,7 +21,6 @@ include(FindOrDownloadJDK)
 include_directories(include ${JNI_INCLUDE_DIRS})
 
 add_subdirectory(csrc)
-add_subdirectory(pythonsrc)
 
 install(
   DIRECTORY include/
@@ -32,9 +33,15 @@ install(
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
 
-install(TARGETS halodi_controller_python
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin)
+if(BUILD_PYTHON_BINDINGS)
+  message("--Build and install the Python bindings...")
+  add_subdirectory(pythonsrc)
+
+  install(TARGETS halodi_controller_python
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin)
+
+endif(BUILD_PYTHON_BINDINGS)
 
 if(ament_cmake_FOUND)
     
