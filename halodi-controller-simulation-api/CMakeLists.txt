@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(halodi-controller-simulation-api)
 
-option(BUILD_PYTHON_BINDINGS "Build the Python bindings for the controller" ON)
+option(BUILD_PYTHON_BINDINGS "Build the Python bindings for the controller" OFF)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 

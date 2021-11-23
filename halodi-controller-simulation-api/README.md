@@ -58,9 +58,9 @@ git clone --recurse-submodules path/to/halodi-controller-simulation-api.git
 # Or after cloning the repo, from the root of the repo
 git submodule update --init
 ```
->__If you don't want build the Python bindings, set the `BUILD_PYTHON_BINDINGS` cmake variable to `FALSE`:__
+>__If you want build the Python bindings, set the `BUILD_PYTHON_BINDINGS` cmake variable to `TRUE`:__
 ```sh
-colcon build --cmake-args -DBUILD_PYTHON_BINDINGS=FALSE [your extra args]
+colcon build --cmake-args -DBUILD_PYTHON_BINDINGS=TRUE [your extra args]
 ```
 The same can be done from Python. The following snippet can be used to import the package:
 
