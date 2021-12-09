@@ -18,9 +18,3 @@ if(NOT ament_cmake_FOUND)
     add_executable(halodi-controller-demo halodicontrollerdemo.cpp)
     target_link_libraries(halodi-controller-demo jvmLauncher halodi-controller-api)
 endif()
-
-
-install(TARGETS halodi-controller-api
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
-)

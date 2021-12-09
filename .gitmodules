@@ -1,0 +1,3 @@
+[submodule "halodi-controller-simulation-api/pythonsrc/pybind11"]
+	path = halodi-controller-simulation-api/pythonsrc/pybind11
+	url = https://github.com/pybind/pybind11.git

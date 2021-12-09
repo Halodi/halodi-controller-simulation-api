@@ -1,0 +1,4 @@
+add_subdirectory(pybind11)
+
+pybind11_add_module(halodi_controller_python MODULE halodicontroller_binding.cpp)
+target_link_libraries(halodi_controller_python PRIVATE halodi-controller-api)
