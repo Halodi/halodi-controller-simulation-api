@@ -62,6 +62,11 @@ git submodule update --init
 ```sh
 colcon build --cmake-args -DBUILD_PYTHON_BINDINGS=TRUE [your extra args]
 ```
+>__A custom Python install can be used to build the bindings, the `CUSTOM_PYTHON_VERSION` (specify the custom version number) and `Python_ROOT_DIR` (specify the path to the root of the custom Python) variables have to be set:__
+```sh
+# Build example for a specific Python 3.7 install, shipped with Isaac sim
+colcon build --cmake-args -DBUILD_PYTHON_BINDINGS=TRUE -DCUSTOM_PYTHON_VERSION=3.7 -DPython_ROOT_DIR=/home/user/.local/share/ov/pkg/isaac_sim-2021.2.0/kit/python [your extra args]
+```
 The same can be done from Python. The following snippet can be used to import the package:
 
 ```py
