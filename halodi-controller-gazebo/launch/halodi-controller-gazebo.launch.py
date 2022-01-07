@@ -4,7 +4,7 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.actions import IncludeLaunchDescription
 from launch.actions import SetEnvironmentVariable
-from launch.conditions import IfCondition
+from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch.substitutions import ThisLaunchFileDir
@@ -21,8 +21,10 @@ def generate_launch_description():
         
     model, plugin, media = GazeboRosPaths.get_paths()
 
+    headless = LaunchConfiguration("headless")
 
     return LaunchDescription([
+
         
         DeclareLaunchArgument(
             'world',
@@ -34,7 +36,7 @@ def generate_launch_description():
             default_value='true',
             description='Enable verbosity',
             ),
-        
+
         # Note that the Halodi Controller publishes /clock and therefore conflicts with gazebo_ros_init
         # Also, resetting the world state is not currently supported by the controller.
         # Therefore, we disable the gazebo_ros_init plugin
@@ -48,7 +50,7 @@ def generate_launch_description():
 
         DeclareLaunchArgument('trajectory-api', default_value='true',
                                   description='Set "false" to disable trajectory api and use realtime api'),
-        
+ 
         SetEnvironmentVariable('HALODI_TRAJECTORY_API', LaunchConfiguration('trajectory-api')),
         
 
@@ -63,6 +65,6 @@ def generate_launch_description():
         ),
 
         IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(os.path.join(gazebo_package_prefix, 'launch', 'gzclient.launch.py'))
+            PythonLaunchDescriptionSource(os.path.join(gazebo_package_prefix, 'launch', 'gzclient.launch.py')), condition=UnlessCondition(headless)
         ),
     ])
