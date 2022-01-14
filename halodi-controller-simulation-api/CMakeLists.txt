@@ -34,7 +34,7 @@ install(
   RUNTIME DESTINATION bin)
 
 if(BUILD_PYTHON_BINDINGS)
-  message("--Build and install the Python bindings...")
+  message("--- Build and install the Python bindings...")
   add_subdirectory(pythonsrc)
 
   install(TARGETS halodi_controller_python
