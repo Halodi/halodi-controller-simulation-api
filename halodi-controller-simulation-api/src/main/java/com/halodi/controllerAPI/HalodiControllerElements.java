@@ -14,14 +14,14 @@ public interface HalodiControllerElements
       return getIMU(name);
    }
 
-   IMUHandle getIMU(String qualifiedName);
+   IMUHandle getIMU(String name);
 
    default ForceTorqueSensorHandle getForceTorqueSensor(String parentLink, String name)
    {
       return getForceTorqueSensor(name);
    }
    
-   ForceTorqueSensorHandle getForceTorqueSensor(String qualifiedName);
+   ForceTorqueSensorHandle getForceTorqueSensor(String name);
    
    
    default SharedBuffer getSharedBuffer(String name)
