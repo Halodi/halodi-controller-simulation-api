@@ -9,7 +9,7 @@ public interface HalodiControllerElements
 {
    static String createQualifiedName(String parentLink, String name)
    {
-      return parentLink + "_" + name;
+      return name;
    }
 
    EffortJointHandle getJoint(String name);
