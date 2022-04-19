@@ -68,6 +68,14 @@ std::shared_ptr<JointHandle> HalodiControllerImplementation::addJoint(std::strin
 
 std::shared_ptr<IMUHandle> HalodiControllerImplementation::addIMU(std::string parentLink, std::string name)
 {
+    // The imu name may already contain the parent link, if so we need to remove it for compatability with the java api 
+    std::string parentLinkPrepend = parentLink + "_";
+    size_t pos = name.find(parentLinkPrepend);
+    if (pos != std::string::npos)
+    {
+        name.erase(pos, parentLinkPrepend.length());
+    }
+
     std::shared_ptr<JavaString> jParent = vm->createJavaString(parentLink);
     std::shared_ptr<JavaString> jName = vm->createJavaString(name);
     double* buffer = (double*) jAddIMU->callBytebufferMethod(bridge, NativeIMUHandleHolder::size * sizeof(double), jParent->native(), jName->native());
