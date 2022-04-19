@@ -10,8 +10,7 @@ def vcsurl = 'https://github.com/Halodi/halodi-controller-simulation-api.git'
 group = "com.halodi"
 version = "0.1.12"
 def repoUrl = "https://artifacts.halodi.com/repository"
-def repository = "maven-open-source-production"
-
+def repository = "/maven-open-source-production"
 
 dependencies {
    implementation 'org.apache.commons:commons-lang3:3.4'
