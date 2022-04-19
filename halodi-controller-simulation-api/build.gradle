@@ -8,7 +8,7 @@ apply plugin: 'maven-publish'
 
 def vcsurl = 'https://github.com/Halodi/halodi-controller-simulation-api.git'
 group = "com.halodi"
-version = "0.2.0"
+version = "0.2.1"
 def repoUrl = "https://artifacts.halodi.com/repository"
 def repository = "/maven-open-source-production"
 

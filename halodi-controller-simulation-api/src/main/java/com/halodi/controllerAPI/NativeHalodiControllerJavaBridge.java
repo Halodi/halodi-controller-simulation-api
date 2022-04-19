@@ -99,14 +99,13 @@ public abstract class NativeHalodiControllerJavaBridge implements HalodiControll
     */
    synchronized ByteBuffer createIMUHandle(String parentLink, String imuName)
    {
-      String name = HalodiControllerElements.createQualifiedName(parentLink, imuName);
-      if(imus.containsKey(name))
+      if(imus.containsKey(imuName))
       {
-         return imus.get(name).getBuffer();
+         return imus.get(imuName).getBuffer();
       }
       
       IMUHandleImpl imuHandle = new IMUHandleImpl(parentLink, imuName);
-      imus.put(name, imuHandle);
+      imus.put(imuName, imuHandle);
       return imuHandle.getBuffer();
    }
 
@@ -118,15 +117,13 @@ public abstract class NativeHalodiControllerJavaBridge implements HalodiControll
     */
    synchronized ByteBuffer createForceTorqueSensorHandle(String parentLink, String forceTorqueSensorName)
    {
-      String name = HalodiControllerElements.createQualifiedName(parentLink, forceTorqueSensorName);
-      
-      if(forceTorqueSensors.containsKey(name))
+      if(forceTorqueSensors.containsKey(forceTorqueSensorName))
       {
-         return forceTorqueSensors.get(name).getBuffer();
+         return forceTorqueSensors.get(forceTorqueSensorName).getBuffer();
       }
       
       ForceTorqueSensorHandleImpl forceTorqueSensorHandle = new ForceTorqueSensorHandleImpl(parentLink, forceTorqueSensorName);
-      forceTorqueSensors.put(name, forceTorqueSensorHandle);
+      forceTorqueSensors.put(forceTorqueSensorName, forceTorqueSensorHandle);
       return forceTorqueSensorHandle.getBuffer();
    }
    

@@ -7,23 +7,18 @@ import com.halodi.controllerAPI.wholeRobot.SharedBuffer;
 
 public interface HalodiControllerElements
 {
-   static String createQualifiedName(String parentLink, String name)
-   {
-      return name;
-   }
-
    EffortJointHandle getJoint(String name);
 
    default IMUHandle getIMU(String parentLink, String name)
    {
-      return getIMU(createQualifiedName(parentLink, name));
+      return getIMU(name);
    }
 
    IMUHandle getIMU(String qualifiedName);
 
    default ForceTorqueSensorHandle getForceTorqueSensor(String parentLink, String name)
    {
-      return getForceTorqueSensor(createQualifiedName(parentLink, name));
+      return getForceTorqueSensor(name);
    }
    
    ForceTorqueSensorHandle getForceTorqueSensor(String qualifiedName);
