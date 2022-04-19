@@ -94,6 +94,7 @@ public abstract class NativeHalodiControllerJavaBridge implements HalodiControll
    /**
     * Return a new IMUHandle. Called from native layer
     * 
+    * @param parentLink (Unused, present for backwards compatibility with native API)
     * @param imuName
     * @return
     */
@@ -112,6 +113,7 @@ public abstract class NativeHalodiControllerJavaBridge implements HalodiControll
    /**
     * Return a new force torque sensor handle. Called from native layer
     * 
+    * @param parentLink  (Unused, present for backwards compatibility with native API)
     * @param forceTorqueSensorName
     * @return
     */
