@@ -94,39 +94,38 @@ public abstract class NativeHalodiControllerJavaBridge implements HalodiControll
    /**
     * Return a new IMUHandle. Called from native layer
     * 
+    * @param parentLink (Unused, present for backwards compatibility with native API)
     * @param imuName
     * @return
     */
    synchronized ByteBuffer createIMUHandle(String parentLink, String imuName)
    {
-      String name = HalodiControllerElements.createQualifiedName(parentLink, imuName);
-      if(imus.containsKey(name))
+      if(imus.containsKey(imuName))
       {
-         return imus.get(name).getBuffer();
+         return imus.get(imuName).getBuffer();
       }
       
       IMUHandleImpl imuHandle = new IMUHandleImpl(parentLink, imuName);
-      imus.put(name, imuHandle);
+      imus.put(imuName, imuHandle);
       return imuHandle.getBuffer();
    }
 
    /**
     * Return a new force torque sensor handle. Called from native layer
     * 
+    * @param parentLink  (Unused, present for backwards compatibility with native API)
     * @param forceTorqueSensorName
     * @return
     */
    synchronized ByteBuffer createForceTorqueSensorHandle(String parentLink, String forceTorqueSensorName)
    {
-      String name = HalodiControllerElements.createQualifiedName(parentLink, forceTorqueSensorName);
-      
-      if(forceTorqueSensors.containsKey(name))
+      if(forceTorqueSensors.containsKey(forceTorqueSensorName))
       {
-         return forceTorqueSensors.get(name).getBuffer();
+         return forceTorqueSensors.get(forceTorqueSensorName).getBuffer();
       }
       
       ForceTorqueSensorHandleImpl forceTorqueSensorHandle = new ForceTorqueSensorHandleImpl(parentLink, forceTorqueSensorName);
-      forceTorqueSensors.put(name, forceTorqueSensorHandle);
+      forceTorqueSensors.put(forceTorqueSensorName, forceTorqueSensorHandle);
       return forceTorqueSensorHandle.getBuffer();
    }
    
@@ -330,15 +329,15 @@ public abstract class NativeHalodiControllerJavaBridge implements HalodiControll
    }
 
    @Override
-   public IMUHandle getIMU(String qualifiedName)
+   public IMUHandle getIMU(String name)
    {
-      return imus.get(qualifiedName);
+      return imus.get(name);
    }
 
    @Override
-   public ForceTorqueSensorHandle getForceTorqueSensor(String qualifiedName)
+   public ForceTorqueSensorHandle getForceTorqueSensor(String name)
    {
-      return forceTorqueSensors.get(qualifiedName);
+      return forceTorqueSensors.get(name);
    }
  
    public SharedBuffer getSharedBuffer(String name)

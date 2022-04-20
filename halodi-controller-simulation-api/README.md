@@ -173,12 +173,8 @@ cd buildc
 ```
 
 # Publishing
-To upload snapshot to artifacts.halodi.com:
-```
-ARTIFACT_USERNAME=[username] ARTIFACT_PASSWORD=[password] ARTIFACT_VERSION=[version] gradle publish
-```
 
 To upload release to artifacts.halodi.com:
 ```
-ARTIFACT_USERNAME=[username] ARTIFACT_PASSWORD=[password] ARTIFACT_VERSION=[version] gradle publish -PenvironmentName=release
+ARTIFACT_USERNAME=[username] ARTIFACT_PASSWORD=[password] gradle publish
 ```
