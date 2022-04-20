@@ -19,7 +19,6 @@ def generate_launch_description():
 
     model, plugin, media = GazeboRosPaths.get_paths()
 
-    headless = LaunchConfiguration("headless")
 
     return LaunchDescription(
         [
@@ -53,6 +52,11 @@ def generate_launch_description():
                 default_value="true",
                 description='Set "false" to disable trajectory api and use realtime api',
             ),
+            DeclareLaunchArgument(
+                "headless",
+                default_value="false",
+                description='Set "true" to disable the visual UI',
+            ),
             SetEnvironmentVariable(
                 "HALODI_TRAJECTORY_API", LaunchConfiguration("trajectory-api")
             ),
@@ -73,7 +77,7 @@ def generate_launch_description():
                 PythonLaunchDescriptionSource(
                     os.path.join(gazebo_package_prefix, "launch", "gzclient.launch.py")
                 ),
-                condition=UnlessCondition(headless),
+                condition=UnlessCondition(LaunchConfiguration("headless")),
             ),
         ]
     )
