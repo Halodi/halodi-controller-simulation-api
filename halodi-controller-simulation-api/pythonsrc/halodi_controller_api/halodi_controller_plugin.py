@@ -1,11 +1,10 @@
 import ctypes
-from ctypes import *
 from pathlib import Path
 import json
 import threading
 import logging
 
-class EffortJointHandle:
+class EffortJointHandle(object):
     """
     Wrapper class around the shared double array between the simulator and controller for Joints
     """
@@ -55,7 +54,7 @@ class EffortJointHandle:
 
 
 
-class IMUHandle:
+class IMUHandle(object):
     """
     Wrapper class around the shared double buffer for the IMU state between the simulator and the controller
     """
@@ -74,7 +73,7 @@ class IMUHandle:
 
     def SetAngularVelocity(self, wx, wy, wz):
         """
-        Set the angular velocity measured by the (simulated) IMU
+        Set the angular velocity measured by the (simulated) IMU [rad/s]
         """
         self.buffer[7] = wx
         self.buffer[8] = wy
@@ -82,7 +81,7 @@ class IMUHandle:
 
     def SetLinearAcceleration(self, xdd, ydd, zdd):
         """
-        Set the linear acceleration measured by the (simulated) IMU
+        Set the linear acceleration measured by the (simulated) IMU [m/s*s]
         """
         self.buffer[4] = xdd
         self.buffer[5] = ydd
@@ -90,7 +89,7 @@ class IMUHandle:
 
 
 
-class HalodiControllerPlugin:
+class HalodiControllerPlugin(object):
     """
     Wrapper between the halodi-controller-simulation-plugin C API and python
     
@@ -116,7 +115,7 @@ class HalodiControllerPlugin:
         self.plugin.halodi_controller_add_joint.restype = ctypes.c_int64
         self.plugin.halodi_controller_add_imu.argtypes = [ctypes.c_char_p]
         self.plugin.halodi_controller_add_imu.restype = ctypes.c_int64
-        self.plugin.halodi_controller_get_controller_description.restype = c_char_p
+        self.plugin.halodi_controller_get_controller_description.restype = ctypes.c_char_p
         self.plugin.halodi_controller_initialize.argtypes = [ctypes.c_char_p]
         self.plugin.halodi_controller_initialize.restype = ctypes.c_bool
         self.plugin.halodi_controller_start.restype = ctypes.c_bool
