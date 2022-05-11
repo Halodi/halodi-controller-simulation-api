@@ -35,7 +35,7 @@ install(
 
   
 install(
-    DIRECTORY pythonsrc/halodi-controller-api
+    DIRECTORY pythonsrc/halodi_controller_api
     DESTINATION share
 )
 

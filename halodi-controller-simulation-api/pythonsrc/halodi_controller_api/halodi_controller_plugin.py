@@ -93,11 +93,18 @@ class IMUHandle:
 class HalodiControllerPlugin:
     """
     Wrapper between the halodi-controller-simulation-plugin C API and python
+    
+    args:
+    
+    controllerName: Name of the controller to load
+    libraryInstallPrefix: Installation prefix of the halodi-controller-simulation-api library (as given to cmake -DCMAKE_INSTALL_PREFIX=??)
+    workingDir: Working directory to start the JVM in
+    
     """
 
-    def __init__(self, controllerName : str):
-        self.libname = (Path(__file__) / "../../../../bin/halodi-controller-simulation-api/lib/libhalodi-controller-api.so").resolve()
-        self.workingdir = (Path(__file__) / "../../../../../../").resolve()
+    def __init__(self, controllerName : str, libraryInstallPrefix: str, workingDir: str):
+        self.libname = (Path(libraryInstallPrefix) / "libhalodi-controller-api.so").resolve()
+        self.workingdir = (Path(workingDir)).resolve()
 
         self.plugin = ctypes.CDLL(self.libname)
 
