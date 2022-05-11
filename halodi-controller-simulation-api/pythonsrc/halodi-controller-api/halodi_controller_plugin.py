@@ -1,10 +1,9 @@
 import ctypes
 from ctypes import *
 from pathlib import Path
-import carb
 import json
 import threading
-
+import logging
 
 class EffortJointHandle:
     """
@@ -118,9 +117,8 @@ class HalodiControllerPlugin:
         self.plugin.halodi_controller_update.restype = ctypes.c_bool
         self.plugin.halodi_controller_stop.restype = ctypes.c_bool
 
-        carb.log_warn(f"Plugin created is {self.plugin.halodi_controller_created()}")
         if(self.plugin.halodi_controller_created()):
-            carb.log_info("Attaching to existing VM")
+            logging.info("Attaching to existing VM")
             self.Attach()
 
             self.config = json.loads(self.plugin.halodi_controller_get_virtual_machine_configuration())
@@ -131,7 +129,7 @@ class HalodiControllerPlugin:
             if(self.plugin.halodi_controller_create(bytes(controllerName, encoding='utf8'), bytes(str(self.workingdir), encoding='utf8'))):
                 self.Attach()
                 self.config = json.loads(self.plugin.halodi_controller_get_virtual_machine_configuration())
-                carb.log_info("Started new Virtual Machine")
+                logging.info("Started new Virtual Machine")
             else:
                 self.PrintLastError("Cannot load Virtual Machine")
 
@@ -203,7 +201,7 @@ class HalodiControllerPlugin:
         """
         Print the last error returned from the controller
         """
-        carb.log_error(f"{description}: {self.plugin.halodi_controller_get_last_error()}")
+        logging.error(f"{description}: {self.plugin.halodi_controller_get_last_error()}")
 
 
     def GetControllerConfiguration(self):
@@ -224,7 +222,7 @@ class HalodiControllerPlugin:
         self.controllerConfiguration = self.GetControllerConfiguration()
 
         if(self.controllerConfiguration["initialized"] == 'true'):
-            carb.log_info(f"Controller loaded")
+            logging.info(f"Controller loaded")
         else:
             if(not self.plugin.halodi_controller_initialize(bytes(arguments, encoding='utf8'))):
                 raise RuntimeError("Cannot initialize controller")
