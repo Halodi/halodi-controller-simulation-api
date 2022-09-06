@@ -15,7 +15,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     link_libraries(stdc++fs)
 endif()
 
-find_package(ament_cmake)
+find_package(ament_cmake QUIET)
 
 include(FindOrDownloadJDK)
 include_directories(include ${JNI_INCLUDE_DIRS})
@@ -33,15 +33,11 @@ install(
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
 
-if(BUILD_PYTHON_BINDINGS)
-  message("--- Build and install the Python bindings...")
-  add_subdirectory(pythonsrc)
-
-  install(TARGETS halodi_controller_python
-    LIBRARY DESTINATION lib
-    RUNTIME DESTINATION bin)
-
-endif(BUILD_PYTHON_BINDINGS)
+  
+install(
+    DIRECTORY pythonsrc/halodi_controller_api
+    DESTINATION share
+)
 
 if(ament_cmake_FOUND)
     
